@@ -5,7 +5,7 @@ export const App = () => {
   return (
     <Flex justify="center">
       <Text fontSize="xl" fontWeight="bolder">
-        CHIP8 Emulator Written in TypeScript
+        CHIP8 Emulator Written in TypeScript!!
       </Text>
     </Flex>
   );
