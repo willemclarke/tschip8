@@ -15,7 +15,7 @@ export const State = (props: Props) => {
   return (
     <VStack align="start">
       <Text fontWeight="bold" fontSize="lg">
-        State:
+        State
       </Text>
       <Text>FPS: {fps}</Text>
       <Text>Program counter: {pc}</Text>

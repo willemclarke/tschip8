@@ -1,17 +1,9 @@
 import React from 'react';
-import {
-  Flex,
-  Box,
-  Text,
-  Button,
-  Center,
-  VStack,
-  ButtonGroup,
-  HStack,
-} from '@chakra-ui/react';
+import { Flex, Box, Text, Button, HStack, VStack } from '@chakra-ui/react';
 import { State } from './components/State';
 import { useRafLoop } from 'react-use';
 import type { Emulator } from './emulator';
+import { Roms } from './components/Roms';
 
 interface Props {
   emulator: Emulator;
@@ -20,9 +12,8 @@ interface Props {
 export const App = (props: Props) => {
   const { emulator } = props;
 
-  const [lastTime, setLastTime] = React.useState<number>(0);
   const fps = 1;
-
+  const [lastTime, setLastTime] = React.useState<number>(0);
   const [stop, start, started] = useRafLoop((time) => {
     if (time - lastTime < 1000 / fps) {
       return;
@@ -37,21 +28,28 @@ export const App = (props: Props) => {
   };
 
   return (
-    <Center>
-      <VStack spacing={4}>
-        <Text fontSize="xl" fontWeight="bolder" mt={4}>
-          CHIP8 Emulator Written in TypeScript
+    <Box border="1px solid red" justifyContent="center" h="100%">
+      <VStack spacing={-1} my={2}>
+        <Text fontSize="xl" fontWeight="bolder">
+          tschip8
         </Text>
-        {/* Emulator here */}
-        <HStack>
-          <Box h="400px" w="500px" bgColor="black"></Box>
-          <State fps={fps} emulator={emulator} />
-        </HStack>
-        <Button size="sm" colorScheme="green" onClick={toggle}>
-          {started() ? 'Stop' : 'Run'}
-        </Button>
-        <Text fontSize="2xl">{lastTime}</Text>
+        <Text>CHIP8 Emulator written in typescript</Text>
       </VStack>
-    </Center>
+      <Flex justify="space-between" border="1px solid green" my={4} mx={12}>
+        <Roms />
+        <Box h={500} w={600} bgColor="black">
+          {/*Draw screen here*/}
+        </Box>
+        <State fps={fps} emulator={emulator} />
+      </Flex>
+      <Flex justify="center">
+        <HStack>
+          <Button colorScheme="green" onClick={toggle}>
+            {started() ? 'Stop' : 'Run'}
+          </Button>
+          <Text fontSize="2xl">{lastTime}</Text>
+        </HStack>
+      </Flex>
+    </Box>
   );
 };
