@@ -1,3 +1,5 @@
+## Chip8 Emulator written in Typescript
+
 # New Project
 
 > ✨ Bootstrapped with Create Snowpack App (CSA).
