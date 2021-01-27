@@ -2,7 +2,7 @@ import React from 'react';
 import { Flex, Box, Text, Button, HStack, VStack } from '@chakra-ui/react';
 import { State } from './components/State';
 import { useRafLoop } from 'react-use';
-import type { Emulator } from './emulator';
+import type { Emulator } from './emulator/emulator';
 import { Roms } from './components/Roms';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 export const App = (props: Props) => {
   const { emulator } = props;
 
-  const fps = 1;
+  const fps = 30;
   const [lastTime, setLastTime] = React.useState<number>(0);
   const [stop, start, started] = useRafLoop((time) => {
     if (time - lastTime < 1000 / fps) {

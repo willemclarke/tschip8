@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import type { Emulator } from '../emulator';
+import type { Emulator } from '../emulator/emulator';
 import { VStack, Text } from '@chakra-ui/react';
 
 interface Props {
@@ -10,12 +10,16 @@ interface Props {
 
 export const State = (props: Props) => {
   const { fps, emulator } = props;
-  const { pc, stack, v, i } = emulator;
+  const { pc, stack, v, i, traces } = emulator;
+
+  const x = _.map(traces, (trace) => {
+    return <div>{JSON.stringify(trace)}</div>;
+  });
 
   return (
     <VStack align="start">
       <Text fontWeight="bold" fontSize="lg">
-        State
+        {x}
       </Text>
       <Text>FPS: {fps}</Text>
       <Text>Program counter: {pc}</Text>
