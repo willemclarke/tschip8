@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex, Box, Text, Button, HStack, VStack } from '@chakra-ui/react';
-import { State } from './components/State';
+import { DebugLog } from './components/DebugLog';
 import { useRafLoop } from 'react-use';
 import type { Emulator } from './emulator/emulator';
 import { Roms } from './components/Roms';
@@ -11,8 +11,8 @@ interface Props {
 
 export const App = (props: Props) => {
   const { emulator } = props;
+  const fps = 20;
 
-  const fps = 30;
   const [lastTime, setLastTime] = React.useState<number>(0);
   const [stop, start, started] = useRafLoop((time) => {
     if (time - lastTime < 1000 / fps) {
@@ -37,14 +37,14 @@ export const App = (props: Props) => {
       </VStack>
       <Flex justify="space-between" border="1px solid green" my={4} mx={12}>
         <Roms />
-        <Box h={500} w={600} bgColor="black">
+        <Box h={500} w="100%" bgColor="black">
           {/*Draw screen here*/}
         </Box>
-        <State fps={fps} emulator={emulator} />
+        <DebugLog fps={fps} emulator={emulator} />
       </Flex>
       <Flex justify="center">
         <HStack>
-          <Button colorScheme="green" onClick={toggle}>
+          <Button colorScheme="teal" onClick={toggle}>
             {started() ? 'Stop' : 'Run'}
           </Button>
           <Text fontSize="2xl">{lastTime}</Text>

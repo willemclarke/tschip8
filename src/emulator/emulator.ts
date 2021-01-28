@@ -1,8 +1,10 @@
 import _ from 'lodash';
 
-interface Trace {
+export interface Trace {
   opcode: Opcode;
   pc: number;
+  i: number;
+  v: number[];
 }
 
 export interface Opcode {
@@ -54,6 +56,7 @@ export class Emulator {
     const nextOpcodeValue = this.getNextOpcode();
     const parsedOpcode = Emulator.parseOpcode(nextOpcodeValue);
     this.addTrace(parsedOpcode);
+    // execute here
   }
 
   getNextOpcode() {
@@ -61,7 +64,7 @@ export class Emulator {
   }
 
   addTrace(opcode: Opcode) {
-    const newTrace = { opcode, pc: this.pc };
+    const newTrace = { opcode, pc: this.pc, i: this.i, v: this.v };
     this.traces.push(newTrace);
 
     if (this.traces.length > 10) {
