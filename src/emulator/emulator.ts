@@ -5,6 +5,8 @@ export interface Trace {
   pc: number;
   i: number;
   v: number[];
+  sp: number;
+  stack: number[];
 }
 
 export interface Opcode {
@@ -64,7 +66,14 @@ export class Emulator {
   }
 
   addTrace(opcode: Opcode) {
-    const newTrace = { opcode, pc: this.pc, i: this.i, v: this.v };
+    const newTrace = {
+      opcode,
+      pc: this.pc,
+      i: this.i,
+      v: this.v,
+      sp: this.sp,
+      stack: this.stack,
+    };
     this.traces.push(newTrace);
 
     if (this.traces.length > 10) {
