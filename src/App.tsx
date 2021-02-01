@@ -11,9 +11,9 @@ interface Props {
 
 export const App = (props: Props) => {
   const { emulator } = props;
-  const fps = 1;
 
   const [rom, setRom] = React.useState<string | undefined>(undefined);
+  const fps = 1;
 
   const [lastTime, setLastTime] = React.useState<number>(0);
   const [stop, start, started] = useRafLoop((time) => {

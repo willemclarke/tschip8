@@ -7,9 +7,31 @@ interface Props {
   onChange: (rom: string) => void;
 }
 
-// Rename all roms to end with .bin
-// fill in all roms
-const roms = ['TICTAC.bin', 'TETRIS.bin'];
+const roms = [
+  '15PUZZLE.bin',
+  'BLINKY.bin',
+  'BLITZ.bin',
+  'BRIX.bin',
+  'CONNECT4.bin',
+  'GUESS.bin',
+  'HIDDEN.bin',
+  'INVADERS.bin',
+  'KALEID.bin',
+  'MAZE.bin',
+  'MERLIN.bin',
+  'MISSILE.bin',
+  'PONG.bin',
+  'PONG2.bin',
+  'PUZZLE.bin',
+  'SYZYGY.bin',
+  'TANK.bin',
+  'TETRIS.bin',
+  'TICTAC.bin',
+  'UFO.bin',
+  'VBRIX.bin',
+  'VERS.bin',
+  'WIPEOFF.bin',
+];
 
 export const Roms = (props: Props) => {
   const { onChange, value } = props;
