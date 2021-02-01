@@ -46,7 +46,7 @@ export const Roms = (props: Props) => {
         placeholder="Select rom"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        variant="flush"
+        variant="flushed"
       >
         {options}
       </Select>
