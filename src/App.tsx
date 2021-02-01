@@ -11,7 +11,9 @@ interface Props {
 
 export const App = (props: Props) => {
   const { emulator } = props;
-  const fps = 20;
+  const fps = 1;
+
+  const [rom, setRom] = React.useState<string | undefined>(undefined);
 
   const [lastTime, setLastTime] = React.useState<number>(0);
   const [stop, start, started] = useRafLoop((time) => {
@@ -19,9 +21,22 @@ export const App = (props: Props) => {
       return;
     }
     setLastTime(time);
-    console.log(time);
     emulator.step();
   }, false);
+
+  React.useEffect(() => {
+    if (rom) {
+      fetch(rom)
+        .then((resp) => {
+          return resp.arrayBuffer();
+        })
+        .then((buffer) => {
+          emulator.reset();
+          emulator.loadRom(buffer);
+          start();
+        });
+    }
+  }, [rom]);
 
   const toggle = () => {
     started() ? stop() : start();
@@ -33,7 +48,7 @@ export const App = (props: Props) => {
         <Text fontSize="xl" fontWeight="bolder">
           tschip8
         </Text>
-        <Text>CHIP8 Emulator written in typescript</Text>
+        <Text>Chip8 Emulator written in Typescript</Text>
       </VStack>
       <Flex
         justify="space-between"
@@ -42,7 +57,7 @@ export const App = (props: Props) => {
         mx={12}
         h={500}
       >
-        <Roms />
+        <Roms value={rom} onChange={setRom} />
         <Box h={500} w="100%" bgColor="black">
           {/*Draw screen here*/}
         </Box>

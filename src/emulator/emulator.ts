@@ -58,7 +58,12 @@ export class Emulator {
     const nextOpcodeValue = this.getNextOpcode();
     const parsedOpcode = Emulator.parseOpcode(nextOpcodeValue);
     this.addTrace(parsedOpcode);
-    // execute here
+    // execute switch statement here
+  }
+
+  loadRom(rom: ArrayBuffer) {
+    this.memory = Array(0x200).fill(0x0).concat(rom);
+    console.log('Loading rom...');
   }
 
   getNextOpcode() {
