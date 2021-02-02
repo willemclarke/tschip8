@@ -41,12 +41,14 @@ export const Roms = (props: Props) => {
   });
 
   return (
-    <Box border="1px solid purple" mx={4} w="100%">
+    <Box mx={4} w="100%">
       <Select
         placeholder="Select rom"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         variant="flushed"
+        fontSize="xl"
+        fontWeight="bolder"
       >
         {options}
       </Select>

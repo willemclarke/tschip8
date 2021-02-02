@@ -1,9 +1,11 @@
 import React from 'react';
-import { Flex, Box, Text, Button, HStack, VStack } from '@chakra-ui/react';
+import { Flex, Box, Button, HStack, Divider } from '@chakra-ui/react';
 import { Debug } from './components/Debug';
+import { Roms } from './components/Roms';
+import { FpsSlider } from './components/FpsSlider';
+import { Header } from './components/Header';
 import { useRafLoop } from 'react-use';
 import type { Emulator } from './emulator/emulator';
-import { Roms } from './components/Roms';
 
 interface Props {
   emulator: Emulator;
@@ -12,10 +14,12 @@ interface Props {
 export const App = (props: Props) => {
   const { emulator } = props;
 
-  const [rom, setRom] = React.useState<string | undefined>(undefined);
-  const fps = 1;
+  const defaultFps = 10;
 
+  const [rom, setRom] = React.useState<string | undefined>(undefined);
+  const [fps, setFps] = React.useState<number>(defaultFps);
   const [lastTime, setLastTime] = React.useState<number>(0);
+
   const [stop, start, started] = useRafLoop((time) => {
     if (time - lastTime < 1000 / fps) {
       return;
@@ -43,13 +47,12 @@ export const App = (props: Props) => {
   };
 
   return (
-    <Box border="1px solid red" justifyContent="center" h="100vh">
-      <VStack spacing={-1} my={2}>
-        <Text fontSize="xl" fontWeight="bolder">
-          tschip8
-        </Text>
-        <Text>Chip8 Emulator written in Typescript</Text>
-      </VStack>
+    <Box justifyContent="center" h="100%">
+      <Header />
+      <Divider />
+      <Flex justify="center" my={3}>
+        <FpsSlider fps={fps} setFps={setFps} />
+      </Flex>
       <Flex
         justify="space-between"
         border="1px solid green"
