@@ -63,7 +63,7 @@ export class Emulator {
 
   loadRom(rom: ArrayBuffer) {
     this.memory = Array(0x200).fill(0x0).concat(rom);
-    console.log('Loading rom...');
+    console.log('Rom loaded...');
   }
 
   getNextOpcode() {

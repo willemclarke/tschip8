@@ -31,7 +31,7 @@ export const Debug = (props: Props) => {
   });
 
   return (
-    <Box border="1px solid purple" mx={4} overflow="scroll" w="100%">
+    <Box mx={4} overflow="scroll" w="100%">
       <VStack align="start">
         <Text fontWeight="bolder" fontSize="xl">
           Debug log
