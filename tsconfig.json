@@ -1,7 +1,7 @@
 {
-  "include": ["src", "types"],
+  "include": ["src", "types", "tests"],
   "compilerOptions": {
-    "module": "esnext",
+    "module": "commonjs",
     "target": "esnext",
     "moduleResolution": "node",
     "jsx": "preserve",

@@ -87,7 +87,7 @@ export class Emulator {
   }
 
   static parseOpcode(raw: number): Opcode {
-    const pretty = '0000' + raw.toString(16).toUpperCase().slice(-4);
+    const pretty = '0x' + raw.toString(16).toUpperCase();
     const hi = (raw & 0xff00) >> 8;
     const lo = raw & 0x00ff;
     const nnn = raw & 0x0fff;
@@ -109,5 +109,15 @@ export class Emulator {
       raw,
       pretty,
     };
+  }
+
+  _1nnn(opcode: Opcode): void {
+    this.pc = opcode.nnn;
+  }
+
+  _2nnn(opcode: Opcode): void {
+    this.sp += 1;
+    this.stack.push(this.pc);
+    this.pc = opcode.nnn;
   }
 }

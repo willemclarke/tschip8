@@ -2,7 +2,7 @@
   "scripts": {
     "start": "snowpack dev",
     "build": "snowpack build",
-    "test": "web-test-runner \"src/**/*.test.tsx\"",
+    "test": "ts-mocha \"tests/**/*.test.ts\"",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\""
   },
@@ -30,8 +30,10 @@
     "@types/snowpack-env": "^2.3.2",
     "@web/test-runner": "^0.12.0",
     "chai": "^4.2.0",
+    "mocha": "^8.2.1",
     "prettier": "^2.0.5",
     "snowpack": "^3.0.1",
+    "ts-mocha": "^8.0.0",
     "typescript": "^4.0.0"
   }
 }
