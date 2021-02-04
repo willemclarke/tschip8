@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 export interface Trace {
   opcode: Opcode;
+  nextOpcode: number;
   pc: number;
   i: number;
   v: number[];
@@ -73,6 +74,7 @@ export class Emulator {
   addTrace(opcode: Opcode) {
     const newTrace = {
       opcode,
+      nextOpcode: this.getNextOpcode(),
       pc: this.pc,
       i: this.i,
       v: this.v,
@@ -117,21 +119,29 @@ export class Emulator {
       case 0x0:
         switch (opcode.kk) {
           case 0x00e0:
-            return this._00E0(opcode);
+            return this._00E0();
         }
       case 0x1:
       // return this._1nnn(opcode);
       case 0x6:
         return this._6xkk(opcode);
+      case 0x7:
+        return this._7xkk(opcode);
       case 0xa:
         return this._Annn(opcode);
+      case 0xd:
+        return this._Dxyn(opcode);
       default:
         throw new Error(`${opcode.pretty} not implemented`);
     }
   }
 
-  _00E0(opcode: Opcode): void {
-    // clear screen
+  _00E0(): void {
+    for (let x = 0; x < this.screen.length; x++) {
+      for (let y = 0; y < this.screen.length; y++) {
+        this.screen[x][y] = 0;
+      }
+    }
     this.pc += 2;
   }
 
@@ -212,7 +222,42 @@ export class Emulator {
 
   _Cxkk(opcode: Opcode): void {}
 
-  _Dxyn(opcode: Opcode): void {}
+  _Dxyn(opcode: Opcode): void {
+    let row,
+      col,
+      sprite,
+      width = 8,
+      height = opcode.n;
+
+    this.v[0xf] = 0;
+
+    for (row = 0; row < height; row++) {
+      sprite = this.memory[this.i + row];
+
+      for (col = 0; col < width; col++) {
+        if ((sprite & 0x80) > 0) {
+          this.screen[this.v[opcode.y] + row][this.v[opcode.x] + col] = 1;
+
+          const int_x = (this.v[opcode.x] + col) & 0xff;
+          const int_y = (this.v[opcode.y] + row) & 0xff;
+
+          const previousPixel = this.screen[int_y][int_x];
+          const newPixel =
+            previousPixel ^ (((sprite & (1 << (7 - this.i))) != 0) as any); // XOR
+
+          this.screen[int_y][int_x] = 1;
+
+          if (previousPixel && !newPixel) {
+            this.v[0xf] = 0x01;
+          }
+        }
+
+        sprite = sprite << 1;
+      }
+    }
+
+    this.pc += 2;
+  }
 
   _Ex9E(opcode: Opcode): void {}
 

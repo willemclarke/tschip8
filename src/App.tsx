@@ -63,9 +63,7 @@ export const App = (props: Props) => {
         h={500}
       >
         <Roms value={rom} onChange={setRom} />
-        <Box h={500} w="100%" bgColor="black">
-          {/*Draw screen here*/}
-        </Box>
+        <Box h={500} w="100%" bgColor="black"></Box>
         <Debug emulator={emulator} />
       </Flex>
       <Flex justify="center">
