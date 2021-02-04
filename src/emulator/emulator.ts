@@ -120,4 +120,12 @@ export class Emulator {
     this.stack.push(this.pc);
     this.pc = opcode.nnn;
   }
+
+  _3xkk(opcode: Opcode): void {
+    this.v[opcode.x] === opcode.kk ? (this.pc += 2) : (this.pc += 1);
+  }
+
+  _4xkk(opcode: Opcode): void {
+    this.v[opcode.x] !== opcode.kk ? (this.pc += 2) : (this.pc += 1);
+  }
 }
