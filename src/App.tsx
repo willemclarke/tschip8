@@ -14,9 +14,9 @@ interface Props {
 export const App = (props: Props) => {
   const { emulator } = props;
 
-  const defaultFps = 10;
+  const defaultFps = 1;
 
-  const [rom, setRom] = React.useState<string | undefined>(undefined);
+  const [rom, setRom] = React.useState<string | undefined>('roms/IBMLOGO.bin');
   const [fps, setFps] = React.useState<number>(defaultFps);
   const [lastTime, setLastTime] = React.useState<number>(0);
 
@@ -28,7 +28,7 @@ export const App = (props: Props) => {
     emulator.step();
   }, false);
 
-  React.useEffect(() => {
+  const init = () => {
     if (rom) {
       fetch(rom)
         .then((resp) => {
@@ -40,7 +40,9 @@ export const App = (props: Props) => {
           start();
         });
     }
-  }, [rom]);
+  };
+
+  React.useEffect(init, [rom]);
 
   const toggle = () => {
     started() ? stop() : start();
@@ -61,9 +63,7 @@ export const App = (props: Props) => {
         h={500}
       >
         <Roms value={rom} onChange={setRom} />
-        <Box h={500} w="100%" bgColor="black">
-          {/*Draw screen here*/}
-        </Box>
+        <Box h={500} w="100%" bgColor="black"></Box>
         <Debug emulator={emulator} />
       </Flex>
       <Flex justify="center">

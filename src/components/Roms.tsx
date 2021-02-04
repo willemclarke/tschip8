@@ -15,6 +15,7 @@ const roms = [
   'CONNECT4.bin',
   'GUESS.bin',
   'HIDDEN.bin',
+  'IBMROM.bin',
   'INVADERS.bin',
   'KALEID.bin',
   'MAZE.bin',
@@ -49,6 +50,7 @@ export const Roms = (props: Props) => {
         variant="flushed"
         fontSize="xl"
         fontWeight="bolder"
+        defaultValue="/roms/IBMROM.bin"
       >
         {options}
       </Select>
