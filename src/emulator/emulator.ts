@@ -45,7 +45,7 @@ export class Emulator {
     this.pc = 0x200;
     this.sp = 0;
     this.stack = [];
-    this.v = [];
+    this.v = Array(0x10).fill(0);
     this.i = 0;
     this.scale = 10;
     this.width = 64;
@@ -189,7 +189,7 @@ export class Emulator {
   }
 
   _7xkk(opcode: Opcode): void {
-    this.v[opcode.x] += opcode.kk;
+    this.v[opcode.x] = (this.v[opcode.x] + opcode.kk) & 0xff;
     this.pc += 2;
   }
 

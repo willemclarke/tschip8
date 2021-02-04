@@ -18,7 +18,7 @@ describe('1nnn', () => {
 });
 
 describe('2nnn', () => {
-  it('2nnn - The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.', () => {
+  it('2nnn - Call subroutine at nnn.', () => {
     const emulator = new Emulator();
     const initialState = _.cloneDeep(emulator);
     const opcode = Emulator.parseOpcode(0x2123);
@@ -40,6 +40,7 @@ describe('3xkk - both outcomes', () => {
     const initialState = _.cloneDeep(emulator);
     emulator._3xkk(opcode);
 
+    expect(emulator.v[opcode.x]).to.equal(opcode.kk);
     expect(emulator.pc).to.equal(initialState.pc + 4);
   });
 
@@ -50,6 +51,7 @@ describe('3xkk - both outcomes', () => {
     const initialState = _.cloneDeep(emulator);
     emulator._3xkk(opcode);
 
+    expect(emulator.v[opcode.x]).to.not.equal(opcode.kk);
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 });
@@ -62,6 +64,7 @@ describe('4xkk - both outcomes', () => {
     const initialState = _.cloneDeep(emulator);
     emulator._4xkk(opcode);
 
+    expect(emulator.v[opcode.x]).to.not.equal(opcode.kk);
     expect(emulator.pc).to.equal(initialState.pc + 4);
   });
 
@@ -72,6 +75,7 @@ describe('4xkk - both outcomes', () => {
     const initialState = _.cloneDeep(emulator);
     emulator._4xkk(opcode);
 
+    expect(emulator.v[opcode.x]).to.equal(opcode.kk);
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 });
@@ -85,6 +89,7 @@ describe('5xyo - both outcomes', () => {
     const initialState = _.cloneDeep(emulator);
     emulator._5xy0(opcode);
 
+    expect(emulator.v[opcode.x]).to.equal(emulator.v[opcode.y]);
     expect(emulator.pc).to.equal(initialState.pc + 4);
   });
 
@@ -96,14 +101,15 @@ describe('5xyo - both outcomes', () => {
     const initialState = _.cloneDeep(emulator);
     emulator._5xy0(opcode);
 
+    expect(emulator.v[opcode.x]).to.not.equal(emulator.v[opcode.y]);
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 
-  describe('6xkk', () => {
+  describe.only('6xkk', () => {
     it('6xkk - Set V[x] = kk ', () => {
       const emulator = new Emulator();
-      const initialState = _.cloneDeep(emulator);
       const opcode = Emulator.parseOpcode(0x6123);
+      const initialState = _.cloneDeep(emulator);
       emulator._6xkk(opcode);
 
       expect(emulator.v[opcode.x]).to.equal(opcode.kk);
@@ -113,12 +119,14 @@ describe('5xyo - both outcomes', () => {
 
   describe('7xkk', () => {
     it('7xkk - Set V[x] = V[x] + kk', () => {
+      // Note V[x] + kk in this case is = 0x4(4) + 0x23(35) === opcode.kk(0x27 = 39)
       const emulator = new Emulator();
-      const initialState = _.cloneDeep(emulator);
       const opcode = Emulator.parseOpcode(0x7123);
+      emulator.v[opcode.x] = 0x4;
+      const initialState = _.cloneDeep(emulator);
       emulator._7xkk(opcode);
 
-      expect(emulator.v[opcode.x]).to.deep.equal(
+      expect(emulator.v[opcode.x]).to.equal(
         initialState.v[opcode.x] + opcode.kk,
       );
       expect(emulator.pc).to.equal(initialState.pc + 2);
