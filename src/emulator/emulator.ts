@@ -54,16 +54,16 @@ export class Emulator {
   }
 
   step() {
-    this.pc += 2;
     const nextOpcodeValue = this.getNextOpcode();
     const parsedOpcode = Emulator.parseOpcode(nextOpcodeValue);
     this.addTrace(parsedOpcode);
-    // execute switch statement here
+    this.executeOpcode(parsedOpcode);
   }
 
   loadRom(rom: ArrayBuffer) {
-    this.memory = Array(0x200).fill(0x0).concat(rom);
-    console.log('Rom loaded...');
+    this.memory = Array(0x200)
+      .fill(0x0)
+      .concat(...new Uint8Array(rom));
   }
 
   getNextOpcode() {
@@ -111,6 +111,34 @@ export class Emulator {
     };
   }
 
+  executeOpcode(opcode: Opcode): void {
+    console.log(`executing opcode: ${opcode.pretty}`);
+    switch (opcode.i) {
+      case 0x0:
+        switch (opcode.kk) {
+          case 0x00e0:
+            return this._00E0(opcode);
+        }
+      case 0x1:
+      // return this._1nnn(opcode);
+      case 0x6:
+        return this._6xkk(opcode);
+      case 0xa:
+        return this._Annn(opcode);
+      default:
+        throw new Error(`${opcode.pretty} not implemented`);
+    }
+  }
+
+  _00E0(opcode: Opcode): void {
+    // clear screen
+    this.pc += 2;
+  }
+
+  _00EE(opcode: Opcode): void {}
+
+  _0nnn(opcode: Opcode): void {}
+
   _1nnn(opcode: Opcode): void {
     this.pc = opcode.nnn;
   }
@@ -122,10 +150,109 @@ export class Emulator {
   }
 
   _3xkk(opcode: Opcode): void {
-    this.v[opcode.x] === opcode.kk ? (this.pc += 2) : (this.pc += 1);
+    if (this.v[opcode.x] === opcode.kk) {
+      this.pc += 4;
+    } else {
+      this.pc += 2;
+    }
   }
 
   _4xkk(opcode: Opcode): void {
-    this.v[opcode.x] !== opcode.kk ? (this.pc += 2) : (this.pc += 1);
+    if (this.v[opcode.x] !== opcode.kk) {
+      this.pc += 4;
+    } else {
+      this.pc += 2;
+    }
   }
+
+  _5xy0(opcode: Opcode): void {
+    if (this.v[opcode.x] === this.v[opcode.y]) {
+      this.pc += 4;
+    } else {
+      this.pc += 2;
+    }
+  }
+
+  _6xkk(opcode: Opcode): void {
+    this.v[opcode.x] = opcode.kk;
+    this.pc += 2;
+  }
+
+  _7xkk(opcode: Opcode): void {
+    this.v[opcode.x] += opcode.kk;
+    this.pc += 2;
+  }
+
+  _8xy0(opcode: Opcode): void {}
+
+  _8xy1(opcode: Opcode): void {}
+
+  _8xy2(opcode: Opcode): void {}
+
+  _8xy3(opcode: Opcode): void {}
+
+  _8xy4(opcode: Opcode): void {}
+
+  _8xy5(opcode: Opcode): void {}
+
+  _8xy6(opcode: Opcode): void {}
+
+  _8xy7(opcode: Opcode): void {}
+
+  _8xyE(opcode: Opcode): void {}
+
+  _9xy0(opcode: Opcode): void {}
+
+  _Annn(opcode: Opcode): void {
+    this.i = opcode.nnn;
+    this.pc += 2;
+  }
+
+  _Bnnn(opcode: Opcode): void {}
+
+  _Cxkk(opcode: Opcode): void {}
+
+  _Dxyn(opcode: Opcode): void {}
+
+  _Ex9E(opcode: Opcode): void {}
+
+  _ExA1(opcode: Opcode): void {}
+
+  _Fx07(opcode: Opcode): void {}
+
+  _Fx0A(opcode: Opcode): void {}
+
+  _Fx15(opcode: Opcode): void {}
+
+  _Fx18(opcode: Opcode): void {}
+
+  _Fx1E(opcode: Opcode): void {}
+
+  _Fx29(opcode: Opcode): void {}
+
+  _Fx33(opcode: Opcode): void {}
+
+  _Fx55(opcode: Opcode): void {}
+
+  _Fx65(opcode: Opcode): void {}
+
+  _00Cn(opcode: Opcode): void {}
+
+  _00FB(opcode: Opcode): void {}
+
+  _00FC(opcode: Opcode): void {}
+
+  _00FD(opcode: Opcode): void {}
+
+  _00FE(opcode: Opcode): void {}
+
+  _00FF(opcode: Opcode): void {}
+
+  _Dxy0(opcode: Opcode): void {}
+
+  _Fx30(opcode: Opcode): void {}
+
+  _Fx75(opcode: Opcode): void {}
+
+  _Fx85(opcode: Opcode): void {}
 }

@@ -36,23 +36,21 @@ describe('3xkk - both outcomes', () => {
   it('3xkk - if V[x] === kk', () => {
     const emulator = new Emulator();
     const opcode = Emulator.parseOpcode(0x3123);
-
     emulator.v[opcode.x] = 0x23;
     const initialState = _.cloneDeep(emulator);
     emulator._3xkk(opcode);
 
-    expect(emulator.pc).to.equal(initialState.pc + 2);
+    expect(emulator.pc).to.equal(initialState.pc + 4);
   });
 
   it('3xkk - if V[x] !== kk', () => {
     const emulator = new Emulator();
     const opcode = Emulator.parseOpcode(0x3123);
-
     emulator.v[opcode.x] = 0x24;
     const initialState = _.cloneDeep(emulator);
     emulator._3xkk(opcode);
 
-    expect(emulator.pc).to.equal(initialState.pc + 1);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 });
 
@@ -60,22 +58,82 @@ describe('4xkk - both outcomes', () => {
   it('4xkk - if V[x] !== kk', () => {
     const emulator = new Emulator();
     const opcode = Emulator.parseOpcode(0x4123);
-
     emulator.v[opcode.x] = 0x24;
     const initialState = _.cloneDeep(emulator);
     emulator._4xkk(opcode);
 
-    expect(emulator.pc).to.equal(initialState.pc + 2);
+    expect(emulator.pc).to.equal(initialState.pc + 4);
   });
 
   it('4xkk - if V[x] === kk', () => {
     const emulator = new Emulator();
     const opcode = Emulator.parseOpcode(0x4123);
-
     emulator.v[opcode.x] = 0x23;
     const initialState = _.cloneDeep(emulator);
     emulator._4xkk(opcode);
 
-    expect(emulator.pc).to.equal(initialState.pc + 1);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+});
+
+describe('5xyo - both outcomes', () => {
+  it('5xy0 - V[x] === V[y]', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x4123);
+    emulator.v[opcode.x] = 0x5;
+    emulator.v[opcode.y] = 0x5;
+    const initialState = _.cloneDeep(emulator);
+    emulator._5xy0(opcode);
+
+    expect(emulator.pc).to.equal(initialState.pc + 4);
+  });
+
+  it('5xy0 - V[x] !== V[y]', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x4123);
+    emulator.v[opcode.x] = 0x5;
+    emulator.v[opcode.y] = 0x4;
+    const initialState = _.cloneDeep(emulator);
+    emulator._5xy0(opcode);
+
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  describe('6xkk', () => {
+    it('6xkk - Set V[x] = kk ', () => {
+      const emulator = new Emulator();
+      const initialState = _.cloneDeep(emulator);
+      const opcode = Emulator.parseOpcode(0x6123);
+      emulator._6xkk(opcode);
+
+      expect(emulator.v[opcode.x]).to.equal(opcode.kk);
+      expect(emulator.pc).to.equal(initialState.pc + 2);
+    });
+  });
+
+  describe('7xkk', () => {
+    it('7xkk - Set V[x] = V[x] + kk', () => {
+      const emulator = new Emulator();
+      const initialState = _.cloneDeep(emulator);
+      const opcode = Emulator.parseOpcode(0x7123);
+      emulator._7xkk(opcode);
+
+      expect(emulator.v[opcode.x]).to.deep.equal(
+        initialState.v[opcode.x] + opcode.kk,
+      );
+      expect(emulator.pc).to.equal(initialState.pc + 2);
+    });
+  });
+
+  describe('Annn', () => {
+    it('Annn - Set I = nnn', () => {
+      const emulator = new Emulator();
+      const initialState = _.cloneDeep(emulator);
+      const opcode = Emulator.parseOpcode(0x6123);
+      emulator._Annn(opcode);
+
+      expect(emulator.i).to.equal(opcode.nnn);
+      expect(emulator.pc).to.equal(initialState.pc + 2);
+    });
   });
 });
