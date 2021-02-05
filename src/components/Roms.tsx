@@ -42,14 +42,13 @@ export const Roms = (props: Props) => {
   });
 
   return (
-    <Box mx={4} w="100%">
+    <Box w="100%" border="1px solid purple">
       <Select
         placeholder="Select rom"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         variant="flushed"
-        fontSize="xl"
-        fontWeight="bolder"
+        fontWeight="bold"
         defaultValue="/roms/IBMROM.bin"
       >
         {options}

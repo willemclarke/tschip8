@@ -6,6 +6,7 @@ import { FpsSlider } from './components/FpsSlider';
 import { Header } from './components/Header';
 import { useRafLoop } from 'react-use';
 import type { Emulator } from './emulator/emulator';
+import { Status } from './components/Status';
 
 interface Props {
   emulator: Emulator;
@@ -52,18 +53,13 @@ export const App = (props: Props) => {
     <Box justifyContent="center" h="100%">
       <Header />
       <Divider />
-      <Flex justify="center" my={3}>
+      <Flex alignItems="center" flexDir="column" mt={3}>
         <FpsSlider fps={fps} setFps={setFps} />
+        <Status traces={emulator.traces} started={started} />
       </Flex>
-      <Flex
-        justify="space-between"
-        border="1px solid green"
-        my={4}
-        mx={12}
-        h={500}
-      >
+      <Flex border="1px solid green" my={4} mx={12} h={500} justify="center">
         <Roms value={rom} onChange={setRom} />
-        <Box h={500} w="100%" bgColor="black"></Box>
+        <Box bgColor="black" border="1px solid green" w="100%"></Box>
         <Debug emulator={emulator} />
       </Flex>
       <Flex justify="center">
@@ -71,6 +67,8 @@ export const App = (props: Props) => {
           <Button colorScheme="teal" onClick={toggle}>
             {started() ? 'Stop' : 'Run'}
           </Button>
+          <Button colorScheme="teal">Step</Button>
+          <Button colorScheme="teal">Pause</Button>
         </HStack>
       </Flex>
     </Box>
