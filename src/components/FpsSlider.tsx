@@ -28,12 +28,11 @@ export const FpsSlider = (props: Props) => {
           defaultValue={fps}
           onChange={(val) => setFps(val)}
           w={250}
-          colorScheme="green"
         >
-          <SliderTrack>
-            <SliderFilledTrack />
+          <SliderTrack bg="green.400">
+            <SliderFilledTrack bg="green.600" />
           </SliderTrack>
-          <SliderThumb />
+          <SliderThumb boxSize={3} />
         </Slider>
       </VStack>
     </Box>

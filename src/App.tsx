@@ -18,7 +18,7 @@ export const App = (props: Props) => {
   const defaultFps = 1;
   const update = useUpdate();
 
-  const [rom, setRom] = React.useState<string | undefined>(undefined);
+  const [rom, setRom] = React.useState<string | undefined>('/roms/IBMLOGO.bin');
   const [fps, setFps] = React.useState<number>(defaultFps);
   const [lastTime, setLastTime] = React.useState<number>(0);
 
@@ -51,6 +51,11 @@ export const App = (props: Props) => {
     update();
   };
 
+  const reset = () => {
+    emulator.reset();
+    toggle();
+  };
+
   return (
     <Box justifyContent="center" h="100%">
       <Header />
@@ -66,11 +71,13 @@ export const App = (props: Props) => {
       </Flex>
       <Flex justify="center">
         <HStack>
-          <Button colorScheme="teal" onClick={toggle}>
+          <Button colorScheme="green" onClick={toggle}>
             {started() ? 'Stop' : 'Run'}
           </Button>
-          <Button colorScheme="teal">Step</Button>
-          <Button colorScheme="teal">Pause</Button>
+          <Button colorScheme="green" onClick={reset}>
+            Reset
+          </Button>
+          <Button colorScheme="green">Pause</Button>
         </HStack>
       </Flex>
     </Box>
