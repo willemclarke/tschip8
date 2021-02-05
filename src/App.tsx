@@ -4,7 +4,7 @@ import { Debug } from './components/Debug';
 import { Roms } from './components/Roms';
 import { FpsSlider } from './components/FpsSlider';
 import { Header } from './components/Header';
-import { useRafLoop } from 'react-use';
+import { useRafLoop, useUpdate } from 'react-use';
 import type { Emulator } from './emulator/emulator';
 import { Status } from './components/Status';
 
@@ -16,8 +16,9 @@ export const App = (props: Props) => {
   const { emulator } = props;
 
   const defaultFps = 1;
+  const update = useUpdate();
 
-  const [rom, setRom] = React.useState<string | undefined>('roms/IBMLOGO.bin');
+  const [rom, setRom] = React.useState<string | undefined>(undefined);
   const [fps, setFps] = React.useState<number>(defaultFps);
   const [lastTime, setLastTime] = React.useState<number>(0);
 
@@ -47,6 +48,7 @@ export const App = (props: Props) => {
 
   const toggle = () => {
     started() ? stop() : start();
+    update();
   };
 
   return (
