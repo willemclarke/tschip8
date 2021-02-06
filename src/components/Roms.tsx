@@ -1,5 +1,5 @@
 import React from 'react';
-import { VStack, Text, Box, Select } from '@chakra-ui/react';
+import { Box, Select } from '@chakra-ui/react';
 import _ from 'lodash';
 
 interface Props {
@@ -42,7 +42,7 @@ export const Roms = (props: Props) => {
   });
 
   return (
-    <Box w="100%" border="1px solid purple">
+    <Box h="100%">
       <Select
         placeholder="Select rom"
         value={value}

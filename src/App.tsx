@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, Box, Button, HStack, Divider } from '@chakra-ui/react';
+import { Flex, Box, Button, HStack, Divider, VStack } from '@chakra-ui/react';
 import { Debug } from './components/Debug';
 import { Roms } from './components/Roms';
 import { FpsSlider } from './components/FpsSlider';
@@ -51,10 +51,10 @@ export const App = (props: Props) => {
     update();
   };
 
-  const reset = () => {
-    emulator.reset();
-    toggle();
-  };
+  // const reset = () => {
+  //   init();
+  //   toggle();
+  // };
 
   return (
     <Box justifyContent="center" h="100%">
@@ -64,20 +64,27 @@ export const App = (props: Props) => {
         <FpsSlider fps={fps} setFps={setFps} />
         <Status traces={emulator.traces} started={started} />
       </Flex>
-      <Flex border="1px solid green" my={4} mx={12} h={500} justify="center">
-        <Roms value={rom} onChange={setRom} />
-        <Box bgColor="black" border="1px solid green" w="100%"></Box>
-        <Debug emulator={emulator} />
+      <Flex border="1px solid green" my={4} mx={200} h={700} justify="center">
+        <Box w="45%" h="100%" border="1px solid purple">
+          <Roms value={rom} onChange={setRom} />
+        </Box>
+        <Box w="55%" border="1px solid red">
+          <VStack>
+            <Box
+              bgColor="black"
+              border="1px solid green"
+              w="100%"
+              h={350}
+            ></Box>
+            <Debug emulator={emulator} />
+          </VStack>
+        </Box>
       </Flex>
       <Flex justify="center">
         <HStack>
           <Button colorScheme="green" onClick={toggle}>
             {started() ? 'Stop' : 'Run'}
           </Button>
-          <Button colorScheme="green" onClick={reset}>
-            Reset
-          </Button>
-          <Button colorScheme="green">Pause</Button>
         </HStack>
       </Flex>
     </Box>

@@ -17,9 +17,21 @@ export const Status = (props: Props) => {
   return (
     <Box mx={4} mt={3}>
       <HStack>
-        <Text>Processed opcode: {processedTrace?.opcode.pretty}</Text>
-        <Text>Next opcode: {nextTrace?.opcode.pretty}</Text>
-        <Text>{started() ? 'Running' : 'Paused'}</Text>
+        <HStack>
+          <Text>Processed opcode:</Text>
+          <Text fontWeight="bolder" color="green.700">
+            {processedTrace?.opcode.pretty}
+          </Text>
+        </HStack>
+        <HStack>
+          <Text>Next opcode:</Text>
+          <Text fontWeight="bolder" color="green.700">
+            {nextTrace?.opcode.pretty}
+          </Text>
+        </HStack>
+        <Text fontWeight="bold" as="i">
+          {started() ? 'Running' : 'Paused'}
+        </Text>
       </HStack>
     </Box>
   );

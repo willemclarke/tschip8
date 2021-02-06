@@ -112,7 +112,7 @@ export class Emulator {
   }
 
   executeOpcode(opcode: Opcode): void {
-    console.log(`executing opcode: ${opcode.pretty}`);
+    // console.log(`executing opcode: ${opcode.pretty}`);
     switch (opcode.i) {
       case 0x0:
         switch (opcode.kk) {
