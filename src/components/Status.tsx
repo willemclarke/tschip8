@@ -15,7 +15,7 @@ export const Status = (props: Props) => {
   const processedTrace = _.last(_.initial(traces));
 
   return (
-    <Box mx={4} mt={3}>
+    <Box px={4} pt={3}>
       <HStack>
         <HStack>
           <Text>Processed opcode:</Text>

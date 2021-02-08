@@ -3,7 +3,7 @@ import React from 'react';
 
 export const Header = () => {
   return (
-    <VStack spacing={-1} my={2}>
+    <VStack spacing={-1} py={2}>
       <Text
         fontSize="2xl"
         fontWeight="extrabold"
@@ -12,7 +12,7 @@ export const Header = () => {
       >
         tschip8
       </Text>
-      <Text>Chip8 Emulator written in Typescript</Text>
+      <Text>Chip-8 Emulator written in Typescript</Text>
     </VStack>
   );
 };

@@ -51,33 +51,23 @@ export const App = (props: Props) => {
     update();
   };
 
-  // const reset = () => {
-  //   init();
-  //   toggle();
-  // };
-
   return (
     <Box justifyContent="center" h="100%">
       <Header />
       <Divider />
-      <Flex alignItems="center" flexDir="column" mt={3}>
+      <Flex alignItems="center" flexDir="column" pt={3}>
         <FpsSlider fps={fps} setFps={setFps} />
         <Status traces={emulator.traces} started={started} />
       </Flex>
-      <Flex border="1px solid green" my={4} mx={200} h={700} justify="center">
-        <Box w="45%" h="100%" border="1px solid purple">
-          <Roms value={rom} onChange={setRom} />
-        </Box>
-        <Box w="55%" border="1px solid red">
+      <Flex border="1px solid green" my={4} px={150} h={700} justify="center">
+        <Box w={700} border="1px solid red">
           <VStack>
-            <Box
-              bgColor="black"
-              border="1px solid green"
-              w="100%"
-              h={350}
-            ></Box>
-            <Debug emulator={emulator} />
+            <Box bgColor="black" w="100%" h={350}></Box>
+            <Roms value={rom} onChange={setRom} />
           </VStack>
+        </Box>
+        <Box w={700} border="1px solid blue">
+          <Debug emulator={emulator} />
         </Box>
       </Flex>
       <Flex justify="center">

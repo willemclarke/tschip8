@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import type { Emulator } from '../emulator/emulator';
-import { VStack, Text, HStack, Box, Divider } from '@chakra-ui/react';
+import { VStack, Text, HStack, Flex } from '@chakra-ui/react';
 
 interface Props {
   emulator: Emulator;
@@ -38,40 +38,57 @@ export const Debug = (props: Props) => {
         <Text>{trace.pc.toString(16)}</Text>
         <Text fontWeight="bold">Opcode:</Text>
         <Text>{trace.opcode.pretty}</Text>
-        <Text fontWeight="bold">IR:</Text>
-        <Text>{trace.i}</Text>
         <Text fontWeight="bold">SP:</Text>
         <Text>{trace.sp}</Text>
       </HStack>
     );
   });
 
-  const vRegister = _.map(processedTrace?.v, (register, index) => {
+  const vRegisters = _.map(processedTrace?.v, (register, index) => {
     return (
-      <>
+      <HStack>
         <Text>{`V[${vRegisterIndexes[index]}]:`}</Text>
         <Text>{register.toString(16)}</Text>
-      </>
+      </HStack>
     );
   });
 
+  const registers = (
+    <>
+      <HStack>
+        <Text>{`PC:`}</Text>
+        <Text>{processedTrace?.pc.toString(16)}</Text>
+      </HStack>
+      <HStack>
+        <Text>{`I:`}</Text>
+        <Text>{processedTrace?.i}</Text>
+      </HStack>
+      {vRegisters}
+      <HStack>
+        <Text>{`DT:`}</Text>
+        <Text>Delay</Text>
+      </HStack>
+      <HStack>
+        <Text>{`ST:`}</Text>
+        <Text>Sound</Text>
+      </HStack>
+    </>
+  );
+
   return (
-    <Box w="100%">
-      <VStack align="start" mx={3} h="70%">
+    <Flex p={2}>
+      <VStack align="start" w={105}>
+        <Text fontWeight="bold" fontSize="xl">
+          Registers
+        </Text>
+        {registers}
+      </VStack>
+      <VStack align="start" pl={4} w={245}>
         <Text fontWeight="bold" fontSize="xl">
           Debug log
         </Text>
         {trace}
       </VStack>
-      <Divider orientation="horizontal" my={3} />
-      <VStack align="start" mx={3}>
-        <Text fontWeight="bold" fontSize="xl">
-          V Registers
-        </Text>
-        <HStack align="start" wrap="wrap">
-          {vRegister}
-        </HStack>
-      </VStack>
-    </Box>
+    </Flex>
   );
 };

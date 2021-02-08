@@ -18,7 +18,7 @@ export const FpsSlider = (props: Props) => {
   const { fps, setFps } = props;
 
   return (
-    <Box mx={4} w={300}>
+    <Box px={4} w={300}>
       <VStack spacing={0}>
         <Text fontWeight="bold">FPS: {fps}</Text>
         <Slider

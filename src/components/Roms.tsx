@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Select } from '@chakra-ui/react';
+import { Select } from '@chakra-ui/react';
 import _ from 'lodash';
 
 interface Props {
@@ -42,17 +42,14 @@ export const Roms = (props: Props) => {
   });
 
   return (
-    <Box h="100%">
-      <Select
-        placeholder="Select rom"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        variant="flushed"
-        fontWeight="bold"
-        defaultValue="/roms/IBMLOGO.bin"
-      >
-        {options}
-      </Select>
-    </Box>
+    <Select
+      placeholder="Select rom"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      variant="flushed"
+      fontWeight="bold"
+    >
+      {options}
+    </Select>
   );
 };
