@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text, HStack } from '@chakra-ui/react';
-import type { Trace } from '../emulator/emulator';
+import type { Trace } from '../../emulator/emulator';
 import _ from 'lodash';
 
 interface Props {
