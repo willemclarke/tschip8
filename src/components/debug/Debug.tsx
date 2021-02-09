@@ -15,9 +15,9 @@ export const Debug = (props: Props) => {
 
   const processedTrace = _.last(_.initial(traces));
 
-  const trace = _.map(traces, (trace) => {
+  const trace = _.map(traces, (trace, index) => {
     return (
-      <HStack>
+      <HStack key={`trace:${index}`}>
         <Text fontWeight="bold">PC:</Text>
         <Text>{trace.pc.toString(16)}</Text>
         <Text fontWeight="bold">Opcode:</Text>

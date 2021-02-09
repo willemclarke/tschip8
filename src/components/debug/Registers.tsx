@@ -31,7 +31,7 @@ export const Registers = (props: Props) => {
 
   const vRegisters = _.map(processedTrace?.v, (register, index) => {
     return (
-      <HStack>
+      <HStack key={`V[${vRegisterIndexes[index]}}]`}>
         <Text>{`V[${vRegisterIndexes[index]}]:`}</Text>
         <Text>{register.toString(16)}</Text>
       </HStack>

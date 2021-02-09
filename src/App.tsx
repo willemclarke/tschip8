@@ -1,10 +1,8 @@
 import React from 'react';
-import { Flex, Box, Button, HStack, Divider, VStack } from '@chakra-ui/react';
+import { Flex, Box, Button, HStack, VStack } from '@chakra-ui/react';
 import { Debug } from './components/debug/Debug';
 import { Roms } from './components/Roms';
-import { FpsSlider } from './components/header/FpsSlider';
 import { Header } from './components/header/Header';
-import { Status } from './components/header/Status';
 import { useRafLoop, useUpdate } from 'react-use';
 import type { Emulator } from './emulator/emulator';
 
@@ -59,14 +57,14 @@ export const App = (props: Props) => {
         traces={emulator.traces}
         started={started}
       />
-      <Flex border="1px solid green" my={4} px={150} h={700} justify="center">
+      <Flex py={4} px={150} h={700} justify="center" border="1px solid green">
         <Box w={700} border="1px solid red">
-          <VStack>
+          <VStack spacing={0}>
             <Box bgColor="black" w={700} h={350}></Box>
             <Roms value={rom} onChange={setRom} />
           </VStack>
         </Box>
-        <Box w={700} border="1px solid blue">
+        <Box w={700} border="1px solid red">
           <Debug emulator={emulator} />
         </Box>
       </Flex>
