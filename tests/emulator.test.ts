@@ -355,3 +355,26 @@ describe('9xy0', () => {
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 });
+
+describe.only('Annn', () => {
+  it('Annn - Set I = nnn.', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0xa123);
+    const initialState = _.cloneDeep(emulator);
+    emulator._Annn(opcode);
+
+    expect(emulator.i).to.equal(opcode.nnn);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+});
+
+describe.only('Bnnn', () => {
+  it('Bnnn - Jump to location nnn + V0', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0xb123);
+    emulator.v[0x0] = 0x33;
+    emulator._Bnnn(opcode);
+
+    expect(emulator.pc).to.equal(opcode.nnn + emulator.v[0x0]);
+  });
+});

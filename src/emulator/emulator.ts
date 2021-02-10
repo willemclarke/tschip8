@@ -146,8 +146,12 @@ export class Emulator {
           case 0x000e:
             return this._8xyE(opcode);
         }
+      case 0x9:
+        return this._9xy0(opcode);
       case 0xa:
         return this._Annn(opcode);
+      case 0xb:
+        return this._Bnnn(opcode);
       case 0xd:
         return this._Dxyn(opcode);
       default:
@@ -165,8 +169,6 @@ export class Emulator {
   }
 
   _00EE(opcode: Opcode): void {}
-
-  _0nnn(opcode: Opcode): void {}
 
   _1nnn(opcode: Opcode): void {
     this.pc = opcode.nnn;
@@ -304,7 +306,9 @@ export class Emulator {
     this.pc += 2;
   }
 
-  _Bnnn(opcode: Opcode): void {}
+  _Bnnn(opcode: Opcode): void {
+    this.pc = opcode.nnn + this.v[0x0];
+  }
 
   _Cxkk(opcode: Opcode): void {}
 
