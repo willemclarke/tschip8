@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import type { Emulator } from './emulator/emulator';
 import { Header } from './components/header/Header';
+import { Screen } from './components/Screen';
 import { Debug } from './components/debug/Debug';
 import { Information } from './components/information/Information';
 import { useRafLoop, useUpdate } from 'react-use';
@@ -83,7 +84,7 @@ export const App = (props: Props) => {
       <Flex py={4} px={150} h={700} justify="center" border="1px solid green">
         <Box w={700} border="1px solid red">
           <VStack spacing={0}>
-            <Box bgColor="black" w={700} h={350}></Box>
+            <Screen screen={emulator.screen} pc={emulator.pc} />
             <Information value={rom} onChange={setRom} />
           </VStack>
         </Box>

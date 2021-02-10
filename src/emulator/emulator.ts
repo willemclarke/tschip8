@@ -359,11 +359,9 @@ export class Emulator {
   _Cxkk(opcode: Opcode): void {}
 
   _Dxyn(opcode: Opcode): void {
-    // let row,
-    //   col,
-    //   sprite,
-    //   width = 8,
-    //   height = opcode.n;
+    const x = this.v[opcode.x] % 64;
+    const y = this.v[opcode.y] % 32;
+    const n = opcode.n;
 
     // this.v[0xf] = 0;
 
@@ -392,6 +390,12 @@ export class Emulator {
     //   }
     // }
 
+    //   for (let col = 0; col < 8; col++) {
+    //     this.screen[x][y] = 1;
+    //   }
+    // }
+    console.log(`setting ${x}, ${y} to on`);
+    this.screen[x][y] = 1;
     this.pc += 2;
   }
 
