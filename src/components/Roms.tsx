@@ -1,5 +1,13 @@
 import React from 'react';
-import { VStack, Text, Box, Select } from '@chakra-ui/react';
+import {
+  Kbd,
+  Select,
+  SimpleGrid,
+  VStack,
+  Text,
+  Flex,
+  Center,
+} from '@chakra-ui/react';
 import _ from 'lodash';
 
 interface Props {
@@ -15,7 +23,7 @@ const roms = [
   'CONNECT4.bin',
   'GUESS.bin',
   'HIDDEN.bin',
-  'IBMROM.bin',
+  'IBMLOGO.bin',
   'INVADERS.bin',
   'KALEID.bin',
   'MAZE.bin',
@@ -37,23 +45,58 @@ const roms = [
 export const Roms = (props: Props) => {
   const { onChange, value } = props;
 
+  const keys = [
+    1,
+    2,
+    3,
+    4,
+    'Q',
+    'W',
+    'E',
+    'R',
+    'A',
+    'S',
+    'D',
+    'F',
+    'Z',
+    'X',
+    'C',
+    'V',
+  ];
+
   const options = _.map(roms, (rom) => {
-    return <option value={`/roms/${rom}`}>{rom}</option>;
+    return (
+      <option value={`/roms/${rom}`} key={rom}>
+        {rom}
+      </option>
+    );
   });
 
+  const keyboardKeys = _.map(keys, (key) => <Kbd key={key}>{key}</Kbd>);
+
   return (
-    <Box mx={4} w="100%">
+    <Flex flexDir="column" w={700}>
       <Select
+        p={1}
         placeholder="Select rom"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        variant="flushed"
-        fontSize="xl"
-        fontWeight="bolder"
-        defaultValue="/roms/IBMROM.bin"
+        variant="filled"
+        fontWeight="bold"
+        size="sm"
       >
         {options}
       </Select>
-    </Box>
+      <Center>
+        <VStack align="start" p={2}>
+          <Text fontSize="xl" fontWeight="bold">
+            Keypad input
+          </Text>
+          <SimpleGrid columns={4} spacingX={2} spacingY={2}>
+            {keyboardKeys}
+          </SimpleGrid>
+        </VStack>
+      </Center>
+    </Flex>
   );
 };
