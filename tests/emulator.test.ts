@@ -2,9 +2,6 @@ import * as _ from 'lodash';
 import { expect } from 'chai';
 import { Emulator } from '../src/emulator/emulator';
 
-// to.eql = deep equal, which is same as to.deep.equal
-// to.equal = strict equal (===)
-
 describe('0 series opcodes', () => {});
 
 describe('1nnn', () => {
@@ -105,7 +102,7 @@ describe('5xyo - both outcomes', () => {
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 
-  describe.only('6xkk', () => {
+  describe('6xkk', () => {
     it('6xkk - Set V[x] = kk ', () => {
       const emulator = new Emulator();
       const opcode = Emulator.parseOpcode(0x6123);
@@ -136,12 +133,199 @@ describe('5xyo - both outcomes', () => {
   describe('Annn', () => {
     it('Annn - Set I = nnn', () => {
       const emulator = new Emulator();
-      const initialState = _.cloneDeep(emulator);
       const opcode = Emulator.parseOpcode(0x6123);
+      const initialState = _.cloneDeep(emulator);
       emulator._Annn(opcode);
 
       expect(emulator.i).to.equal(opcode.nnn);
       expect(emulator.pc).to.equal(initialState.pc + 2);
     });
+  });
+});
+
+describe.only('8 series opcodes', () => {
+  it('8xy0 - Set V[x] = V[y]', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8120);
+    emulator.v[opcode.y] = 0x4;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy0(opcode);
+
+    expect(emulator.v[opcode.x]).to.equal(initialState.v[opcode.y]);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy1 - Set Vx = Vx OR Vy', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8121);
+    emulator.v[opcode.x] = 0x8;
+    emulator.v[opcode.y] = 0x7;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy1(opcode);
+
+    expect(emulator.v[opcode.x]).to.equal(
+      initialState.v[opcode.x] | initialState.v[opcode.y],
+    );
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy2 - Set Vx = Vx AND Vy', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8122);
+    emulator.v[opcode.x] = 0x8;
+    emulator.v[opcode.y] = 0x7;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy2(opcode);
+
+    expect(emulator.v[opcode.x]).to.equal(
+      initialState.v[opcode.x] & initialState.v[opcode.y],
+    );
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy3 - Set Vx = Vx XOR Vy', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8673);
+    emulator.v[opcode.x] = 0x7;
+    emulator.v[opcode.y] = 0x5;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy3(opcode);
+
+    expect(emulator.v[opcode.x]).to.equal(
+      initialState.v[opcode.x] ^ initialState.v[opcode.y],
+    );
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy4 - Set Vx = Vx + Vy, set VF = carry - If result of V[x] > 255, set V[f] to 1', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8674);
+    emulator.v[opcode.x] = 0x80;
+    emulator.v[opcode.y] = 0x80;
+    const result = emulator.v[opcode.x] + emulator.v[opcode.y];
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy4(opcode);
+
+    expect(result).to.be.greaterThan(255);
+    expect(emulator.v[0xf]).to.equal(1);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy4 - Set Vx = Vx + Vy, set VF = carry - If result of V[x] < 255, set V[f] to 0', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8674);
+    emulator.v[opcode.x] = 0x80;
+    emulator.v[opcode.y] = 0x50;
+    const result = emulator.v[opcode.x] + emulator.v[opcode.y];
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy4(opcode);
+
+    expect(result).to.not.be.greaterThan(255);
+    expect(emulator.v[0xf]).to.equal(0);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy5 - Set Vx = Vx - Vy, set VF = NOT borrow - If V[x] > V[y], set V[f] to 1', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8675);
+    emulator.v[opcode.x] = 0x80;
+    emulator.v[opcode.y] = 0x50;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy5(opcode);
+
+    expect(emulator.v[0xf]).to.equal(1);
+    expect(emulator.v[opcode.x]).to.equal(0x80 - 0x50);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy5 - Set Vx = Vx - Vy, set VF = NOT borrow - If V[x] < V[y], set V[f] to 0', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8675);
+    emulator.v[opcode.x] = 0x50;
+    emulator.v[opcode.y] = 0x60;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy5(opcode);
+
+    expect(emulator.v[0xf]).to.equal(0);
+    expect(emulator.v[opcode.x]).to.equal(0x50 - 0x60);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy6 - Set Vx = Vx SHR 1. - If lsb of V[x] is 1, set V[f] to 1', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8676);
+    emulator.v[opcode.x] = 0x1;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy6(opcode);
+
+    expect(emulator.v[0xf]).to.equal(0x1);
+    expect(emulator.v[opcode.x]).to.equal(initialState.v[opcode.x] / 2);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy6 - Set Vx = Vx SHR 1. - If lsb of V[x] is not 1, set V[f] to 0', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8676);
+    emulator.v[opcode.x] = 0x4;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy6(opcode);
+
+    expect(emulator.v[0xf]).to.equal(0x0);
+    expect(emulator.v[opcode.x]).to.equal(initialState.v[opcode.x] / 2);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy7 - Set Vx = Vy - Vx, set VF = NOT borrow - If V[y] > V[x], set V[f] to 1', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8687);
+    emulator.v[opcode.y] = 0x8;
+    emulator.v[opcode.x] = 0x5;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy7(opcode);
+
+    expect(emulator.v[0xf]).to.equal(0x1);
+    expect(emulator.v[opcode.x]).to.equal(
+      initialState.v[opcode.y] - initialState.v[opcode.x],
+    );
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xy7 - Set Vx = Vy - Vx, set VF = NOT borrow - If V[y] < V[x], set V[f] to 0', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x8687);
+    emulator.v[opcode.y] = 0x5;
+    emulator.v[opcode.x] = 0x8;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xy7(opcode);
+
+    expect(emulator.v[0xf]).to.equal(0x0);
+    expect(emulator.v[opcode.x]).to.equal(
+      initialState.v[opcode.y] - initialState.v[opcode.x],
+    );
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xyE - Set Vx = Vx SHL 1 - If msb of V[x] is 1, set V[f] to 1', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x843e);
+    emulator.v[opcode.x] = 0x80; // 0x80 is equal to 128, whereby msb is 1
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xyE(opcode);
+
+    expect(emulator.v[0xf]).to.equal(0x1);
+    expect(emulator.v[opcode.x]).to.equal(initialState.v[opcode.x] * 2);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('8xyE - Set Vx = Vx SHL 1 - If msb of V[x] is not 1, set V[f] to 0', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x843e);
+    emulator.v[opcode.x] = 0x11;
+    const initialState = _.cloneDeep(emulator);
+    emulator._8xyE(opcode);
+
+    expect(emulator.v[0xf]).to.equal(0x0);
+    expect(emulator.v[opcode.x]).to.equal(initialState.v[opcode.x] * 2);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 });

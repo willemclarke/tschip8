@@ -120,11 +120,32 @@ export class Emulator {
             return this._00E0();
         }
       case 0x1:
-      // return this._1nnn(opcode);
+        return this._1nnn(opcode);
       case 0x6:
         return this._6xkk(opcode);
       case 0x7:
         return this._7xkk(opcode);
+      case 0x8:
+        switch (opcode.n) {
+          case 0x0:
+            return this._8xy0(opcode);
+          case 0x0001:
+            return this._8xy1(opcode);
+          case 0x0002:
+            return this._8xy2(opcode);
+          case 0x0003:
+            return this._8xy3(opcode);
+          case 0x0004:
+            return this._8xy3(opcode);
+          case 0x0005:
+            return this._8xy5(opcode);
+          case 0x0006:
+            return this._8xy6(opcode);
+          case 0x0007:
+            return this._8xy7(opcode);
+          case 0x000e:
+            return this._8xyE(opcode);
+        }
       case 0xa:
         return this._Annn(opcode);
       case 0xd:
@@ -191,23 +212,84 @@ export class Emulator {
     this.pc += 2;
   }
 
-  _8xy0(opcode: Opcode): void {}
+  _8xy0(opcode: Opcode): void {
+    this.v[opcode.x] = this.v[opcode.y];
+    this.pc += 2;
+  }
 
-  _8xy1(opcode: Opcode): void {}
+  _8xy1(opcode: Opcode): void {
+    this.v[opcode.x] |= this.v[opcode.y];
+    this.pc += 2;
+  }
 
-  _8xy2(opcode: Opcode): void {}
+  _8xy2(opcode: Opcode): void {
+    this.v[opcode.x] &= this.v[opcode.y];
+    this.pc += 2;
+  }
 
-  _8xy3(opcode: Opcode): void {}
+  _8xy3(opcode: Opcode): void {
+    this.v[opcode.x] ^= this.v[opcode.y];
+    this.pc += 2;
+  }
 
-  _8xy4(opcode: Opcode): void {}
+  _8xy4(opcode: Opcode): void {
+    const result = (this.v[opcode.x] += this.v[opcode.y]);
 
-  _8xy5(opcode: Opcode): void {}
+    if (result > 255) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
+    }
+    this.v[opcode.x] = result & 0xff;
+    this.pc += 2;
+  }
 
-  _8xy6(opcode: Opcode): void {}
+  _8xy5(opcode: Opcode): void {
+    const result = this.v[opcode.x] - this.v[opcode.y];
 
-  _8xy7(opcode: Opcode): void {}
+    if (this.v[opcode.x] > this.v[opcode.y]) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
+    }
+    this.v[opcode.x] = result;
+    this.pc += 2;
+  }
 
-  _8xyE(opcode: Opcode): void {}
+  _8xy6(opcode: Opcode): void {
+    const lsb = this.v[opcode.x] & 1;
+
+    if (lsb === 1) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
+    }
+    this.v[opcode.x] /= 2;
+    this.pc += 2;
+  }
+
+  _8xy7(opcode: Opcode): void {
+    const result = this.v[opcode.y] - this.v[opcode.x];
+
+    if (this.v[opcode.y] > this.v[opcode.x]) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
+    }
+    this.v[opcode.x] = result;
+    this.pc += 2;
+  }
+
+  _8xyE(opcode: Opcode): void {
+    const msb = (this.v[opcode.x] & 0xff) >> 7;
+    if (msb === 1) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
+    }
+    this.v[opcode.x] *= 2;
+    this.pc += 2;
+  }
 
   _9xy0(opcode: Opcode): void {}
 
