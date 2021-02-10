@@ -291,7 +291,13 @@ export class Emulator {
     this.pc += 2;
   }
 
-  _9xy0(opcode: Opcode): void {}
+  _9xy0(opcode: Opcode): void {
+    if (this.v[opcode.x] !== this.v[opcode.y]) {
+      this.pc += 4;
+    } else {
+      this.pc += 2;
+    }
+  }
 
   _Annn(opcode: Opcode): void {
     this.i = opcode.nnn;

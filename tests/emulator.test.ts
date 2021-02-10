@@ -143,7 +143,7 @@ describe('5xyo - both outcomes', () => {
   });
 });
 
-describe.only('8 series opcodes', () => {
+describe('8 series opcodes', () => {
   it('8xy0 - Set V[x] = V[y]', () => {
     const emulator = new Emulator();
     const opcode = Emulator.parseOpcode(0x8120);
@@ -326,6 +326,32 @@ describe.only('8 series opcodes', () => {
 
     expect(emulator.v[0xf]).to.equal(0x0);
     expect(emulator.v[opcode.x]).to.equal(initialState.v[opcode.x] * 2);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+});
+
+describe('9xy0', () => {
+  it('9xy0 - Skip next instruction if Vx != Vy, PC += 4', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x9450);
+    emulator.v[opcode.x] = 0x7;
+    emulator.v[opcode.y] = 0x5;
+    const initialState = _.cloneDeep(emulator);
+    emulator._9xy0(opcode);
+
+    expect(emulator.v[opcode.x]).to.not.equal(emulator.v[opcode.y]);
+    expect(emulator.pc).to.equal(initialState.pc + 4);
+  });
+
+  it('9xy0 - Skip next instruction if Vx === Vy, PC += 2', () => {
+    const emulator = new Emulator();
+    const opcode = Emulator.parseOpcode(0x9450);
+    emulator.v[opcode.x] = 0x7;
+    emulator.v[opcode.y] = 0x7;
+    const initialState = _.cloneDeep(emulator);
+    emulator._9xy0(opcode);
+
+    expect(emulator.v[opcode.x]).to.equal(emulator.v[opcode.y]);
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 });
