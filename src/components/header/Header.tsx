@@ -7,12 +7,12 @@ import { Status } from './Status';
 interface Props {
   fps: number;
   setFps: (value: number) => void;
-  traces: Trace[];
+  trace: Trace;
   started: () => boolean;
 }
 
 export const Header = (props: Props) => {
-  const { fps, setFps, traces, started } = props;
+  const { fps, setFps, trace, started } = props;
 
   return (
     <>
@@ -30,7 +30,7 @@ export const Header = (props: Props) => {
       <Divider />
       <Flex alignItems="center" flexDir="column" pt={3}>
         <FpsSlider fps={fps} setFps={setFps} />
-        <Status traces={traces} started={started} />
+        <Status trace={trace} started={started} />
       </Flex>
     </>
   );

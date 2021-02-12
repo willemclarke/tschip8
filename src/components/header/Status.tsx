@@ -4,15 +4,14 @@ import type { Trace } from '../../emulator/emulator';
 import _ from 'lodash';
 
 interface Props {
-  traces: Trace[];
+  trace: Trace;
   started: () => boolean;
 }
 
 export const Status = (props: Props) => {
-  const { traces, started } = props;
+  const { trace, started } = props;
 
-  const nextTrace = _.last(traces);
-  const processedTrace = _.last(_.initial(traces));
+  const currentTrace = trace.opcodeSummary.current.pretty;
 
   return (
     <Box px={4} pt={3}>
@@ -20,13 +19,13 @@ export const Status = (props: Props) => {
         <HStack>
           <Text>Processed opcode:</Text>
           <Text fontWeight="bolder" color="green.700">
-            {processedTrace?.opcode.pretty}
+            {currentTrace}
           </Text>
         </HStack>
         <HStack>
           <Text>Next opcode:</Text>
           <Text fontWeight="bolder" color="green.700">
-            {nextTrace?.opcode.pretty}
+            {/* {nextTrace?.opcode.pretty} */}
           </Text>
         </HStack>
         <Text fontWeight="bold" as="i">

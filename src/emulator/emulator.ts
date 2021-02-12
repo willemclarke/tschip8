@@ -1,12 +1,9 @@
 import _ from 'lodash';
 
-export interface Trace {
-  opcode: Opcode;
-  pc: number;
-  i: number;
-  v: number[];
-  sp: number;
-  stack: number[];
+export interface OpcodeSummary {
+  previous: Opcode[];
+  current: Opcode;
+  next: Opcode[];
 }
 
 export interface Opcode {
@@ -22,6 +19,16 @@ export interface Opcode {
   i: number;
 }
 
+export interface Trace {
+  opcode: Opcode;
+  pc: number;
+  i: number;
+  v: number[];
+  sp: number;
+  stack: number[];
+  opcodeSummary: OpcodeSummary;
+}
+
 export class Emulator {
   memory: number[];
   pc: number;
@@ -33,7 +40,7 @@ export class Emulator {
   width: number;
   height: number;
   screen: number[][];
-  traces: Trace[];
+  trace: Trace;
 
   constructor() {
     this.reset();
@@ -50,40 +57,55 @@ export class Emulator {
     this.width = 64;
     this.height = 32;
     this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
-    this.traces = [];
   }
 
-  step() {
-    const nextOpcodeValue = this.getNextOpcode();
-    const parsedOpcode = Emulator.parseOpcode(nextOpcodeValue);
-    this.addTrace(parsedOpcode);
-    this.executeOpcode(parsedOpcode);
+  step(): void {
+    const nextOpcode = this.getNextOpcode();
+    this.executeOpcode(nextOpcode);
   }
 
-  loadRom(rom: ArrayBuffer) {
+  loadRom(rom: ArrayBuffer): void {
     this.memory = Array(0x200)
       .fill(0x0)
       .concat(...new Uint8Array(rom));
   }
 
-  getNextOpcode() {
-    return (this.memory[this.pc] << 8) | this.memory[this.pc + 1];
+  getWord16(address: number): number {
+    return (this.memory[address] << 8) | this.memory[address + 1];
   }
 
-  addTrace(opcode: Opcode) {
-    const newTrace = {
+  getNextOpcode(): Opcode {
+    return Emulator.parseOpcode(this.getWord16(this.pc));
+  }
+
+  getOpcodeSummary(opcode: Opcode, pc: number): OpcodeSummary {
+    const previous = _.chain(_.range(1, 11))
+      .map((i) => {
+        return Emulator.parseOpcode(this.getWord16(pc - i * 2));
+      })
+      .filter((item) => item.pretty !== '0x0')
+      .value();
+
+    return {
+      previous,
+      current: opcode,
+      next: [],
+    };
+  }
+
+  getTrace(): Trace {
+    const opcode = this.getNextOpcode();
+    const opcodeSummary = this.getOpcodeSummary(opcode, this.pc);
+
+    return {
       opcode,
       pc: this.pc,
       i: this.i,
       v: this.v,
       sp: this.sp,
       stack: this.stack,
+      opcodeSummary,
     };
-    this.traces.push(newTrace);
-
-    if (this.traces.length > 10) {
-      this.traces.shift();
-    }
   }
 
   static parseOpcode(raw: number): Opcode {
@@ -121,6 +143,8 @@ export class Emulator {
         }
       case 0x1:
         return this._1nnn(opcode);
+      case 0x2:
+        return this._2nnn(opcode);
       case 0x6:
         return this._6xkk(opcode);
       case 0x7:
@@ -284,6 +308,7 @@ export class Emulator {
 
   _8xyE(opcode: Opcode): void {
     const msb = (this.v[opcode.x] & 0xff) >> 7;
+
     if (msb === 1) {
       this.v[0xf] = 1;
     } else {

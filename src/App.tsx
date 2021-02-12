@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import { Flex, Box, Button, HStack, VStack } from '@chakra-ui/react';
 import { Debug } from './components/debug/Debug';
 import { Roms } from './components/Roms';
@@ -28,24 +29,39 @@ export const App = (props: Props) => {
     emulator.step();
   }, false);
 
-  const init = () => {
-    if (rom) {
-      fetch(rom)
-        .then((resp) => {
-          return resp.arrayBuffer();
-        })
-        .then((buffer) => {
-          emulator.reset();
-          emulator.loadRom(buffer);
-          start();
-        });
-    }
+  const init = async (rom: string) => {
+    await fetch(rom)
+      .then((resp) => {
+        return resp.arrayBuffer();
+      })
+      .then((buffer) => {
+        emulator.reset();
+        emulator.loadRom(buffer);
+      });
   };
 
-  React.useEffect(init, [rom]);
+  React.useEffect(() => {
+    if (rom) {
+      init(rom);
+    }
+  }, [rom]);
 
   const toggle = () => {
     started() ? stop() : start();
+    update();
+  };
+
+  const onStep = () => {
+    emulator.step();
+    stop();
+    update();
+  };
+
+  const onReset = async () => {
+    if (rom) {
+      await init(rom);
+    }
+    stop();
     update();
   };
 
@@ -54,7 +70,7 @@ export const App = (props: Props) => {
       <Header
         fps={fps}
         setFps={setFps}
-        traces={emulator.traces}
+        trace={emulator.getTrace()}
         started={started}
       />
       <Flex py={4} px={150} h={700} justify="center" border="1px solid green">
@@ -71,7 +87,13 @@ export const App = (props: Props) => {
       <Flex justify="center">
         <HStack>
           <Button colorScheme="green" onClick={toggle}>
-            {started() ? 'Stop' : 'Run'}
+            {started() ? 'Pause' : 'Run'}
+          </Button>
+          <Button colorScheme="green" onClick={onStep}>
+            Step
+          </Button>
+          <Button colorScheme="green" onClick={onReset}>
+            Reset
           </Button>
         </HStack>
       </Flex>
