@@ -1,11 +1,11 @@
 import React from 'react';
 import _ from 'lodash';
 import { Flex, Box, Button, HStack, VStack } from '@chakra-ui/react';
-import { Debug } from './components/debug/Debug';
-import { Roms } from './components/Roms';
-import { Header } from './components/header/Header';
-import { useRafLoop, useUpdate } from 'react-use';
 import type { Emulator } from './emulator/emulator';
+import { Header } from './components/header/Header';
+import { Debug } from './components/debug/Debug';
+import { Information } from './components/information/Information';
+import { useRafLoop, useUpdate } from 'react-use';
 
 interface Props {
   emulator: Emulator;
@@ -77,7 +77,7 @@ export const App = (props: Props) => {
         <Box w={700} border="1px solid red">
           <VStack spacing={0}>
             <Box bgColor="black" w={700} h={350}></Box>
-            <Roms value={rom} onChange={setRom} />
+            <Information value={rom} onChange={setRom} />
           </VStack>
         </Box>
         <Box w={700} border="1px solid red">

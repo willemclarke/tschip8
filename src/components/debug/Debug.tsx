@@ -17,7 +17,7 @@ export const Debug = (props: Props) => {
   return (
     <Flex p={2} w={700}>
       <VStack>
-        <Registers processedTrace={trace} />
+        <Registers trace={trace} />
       </VStack>
       <VStack>
         <Memory trace={trace} />

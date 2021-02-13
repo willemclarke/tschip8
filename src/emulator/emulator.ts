@@ -1,9 +1,15 @@
 import _ from 'lodash';
+import { parseOpcodeDescription } from './utils';
 
 export interface OpcodeSummary {
   previous: Opcode[];
   current: Opcode;
   next: Opcode[];
+}
+
+export interface DebugInfo {
+  pc: number;
+  opcode: Opcode;
 }
 
 export interface Opcode {
@@ -17,6 +23,7 @@ export interface Opcode {
   kk: number;
   raw: number;
   i: number;
+  description: string | undefined;
 }
 
 export interface Trace {
@@ -109,6 +116,7 @@ export class Emulator {
   }
 
   static parseOpcode(raw: number): Opcode {
+    const description = parseOpcodeDescription(raw);
     const pretty = '0x' + raw.toString(16).toUpperCase();
     const hi = (raw & 0xff00) >> 8;
     const lo = raw & 0x00ff;
@@ -130,6 +138,7 @@ export class Emulator {
       i,
       raw,
       pretty,
+      description,
     };
   }
 
