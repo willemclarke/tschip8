@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Kbd,
-  Select,
-  SimpleGrid,
-  VStack,
-  Text,
-  Flex,
-  Center,
-} from '@chakra-ui/react';
+import { Select } from '@chakra-ui/react';
 import _ from 'lodash';
 
 interface Props {

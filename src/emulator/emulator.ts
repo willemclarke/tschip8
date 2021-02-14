@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { parseOpcodeDescription } from './utils';
+import { Mnemonic, parseOpcode } from './opcode';
 
 export interface OpcodeSummary {
   previous: Opcode[];
@@ -13,6 +13,8 @@ export interface DebugInfo {
 }
 
 export interface Opcode {
+  mnemonic: Mnemonic;
+  description: string;
   pretty: string;
   hi: number;
   lo: number;
@@ -23,7 +25,6 @@ export interface Opcode {
   kk: number;
   raw: number;
   i: number;
-  description: string | undefined;
 }
 
 export interface Trace {
@@ -82,13 +83,13 @@ export class Emulator {
   }
 
   getNextOpcode(): Opcode {
-    return Emulator.parseOpcode(this.getWord16(this.pc));
+    return parseOpcode(this.getWord16(this.pc));
   }
 
   getOpcodeSummary(opcode: Opcode, pc: number): OpcodeSummary {
     const previous = _.chain(_.range(1, 11))
       .map((i) => {
-        return Emulator.parseOpcode(this.getWord16(pc - i * 2));
+        return parseOpcode(this.getWord16(pc - i * 2));
       })
       .filter((item) => item.pretty !== '0x0')
       .value();
@@ -115,77 +116,54 @@ export class Emulator {
     };
   }
 
-  static parseOpcode(raw: number): Opcode {
-    const description = parseOpcodeDescription(raw);
-    const pretty = '0x' + raw.toString(16).toUpperCase();
-    const hi = (raw & 0xff00) >> 8;
-    const lo = raw & 0x00ff;
-    const nnn = raw & 0x0fff;
-    const n = raw & 0x000f;
-    const x = (raw & 0x0f00) >> 8;
-    const y = (raw & 0x00f0) >> 4;
-    const kk = raw & 0x00ff;
-    const i = (raw & 0xf000) >> 12;
-
-    return {
-      hi,
-      lo,
-      nnn,
-      n,
-      x,
-      y,
-      kk,
-      i,
-      raw,
-      pretty,
-      description,
-    };
-  }
-
   executeOpcode(opcode: Opcode): void {
     // console.log(`executing opcode: ${opcode.pretty}`);
-    switch (opcode.i) {
-      case 0x0:
-        switch (opcode.kk) {
-          case 0x00e0:
-            return this._00E0();
-        }
-      case 0x1:
+    switch (opcode.mnemonic) {
+      case Mnemonic['00E0']:
+        return this._00E0();
+      case Mnemonic['00EE']:
+        return this._00EE(opcode);
+      case Mnemonic['1NNN']:
         return this._1nnn(opcode);
-      case 0x2:
+      case Mnemonic['2NNN']:
         return this._2nnn(opcode);
-      case 0x6:
+      case Mnemonic['3XKK']:
+        return this._3xkk(opcode);
+      case Mnemonic['4XKK']:
+        return this._4xkk(opcode);
+      case Mnemonic['6XKK']:
+        return this._5xy0(opcode);
+      case Mnemonic['6XKK']:
         return this._6xkk(opcode);
-      case 0x7:
+      case Mnemonic['7XKK']:
         return this._7xkk(opcode);
-      case 0x8:
-        switch (opcode.n) {
-          case 0x0:
-            return this._8xy0(opcode);
-          case 0x0001:
-            return this._8xy1(opcode);
-          case 0x0002:
-            return this._8xy2(opcode);
-          case 0x0003:
-            return this._8xy3(opcode);
-          case 0x0004:
-            return this._8xy3(opcode);
-          case 0x0005:
-            return this._8xy5(opcode);
-          case 0x0006:
-            return this._8xy6(opcode);
-          case 0x0007:
-            return this._8xy7(opcode);
-          case 0x000e:
-            return this._8xyE(opcode);
-        }
-      case 0x9:
+      case Mnemonic['8XY0']:
+        return this._8xy0(opcode);
+      case Mnemonic['8XY1']:
+        return this._8xy1(opcode);
+      case Mnemonic['8XY2']:
+        return this._8xy2(opcode);
+      case Mnemonic['8XY3']:
+        return this._8xy3(opcode);
+      case Mnemonic['8XY4']:
+        return this._8xy4(opcode);
+      case Mnemonic['8XY5']:
+        return this._8xy5(opcode);
+      case Mnemonic['8XY6']:
+        return this._8xy6(opcode);
+      case Mnemonic['8XY7']:
+        return this._8xy7(opcode);
+      case Mnemonic['8XYE']:
+        return this._8xyE(opcode);
+      case Mnemonic['9XY0']:
         return this._9xy0(opcode);
-      case 0xa:
+      case Mnemonic.ANNN:
         return this._Annn(opcode);
-      case 0xb:
+      case Mnemonic.BNNN:
         return this._Bnnn(opcode);
-      case 0xd:
+      case Mnemonic.CXKK:
+        return this._Cxkk(opcode);
+      case Mnemonic.DXYN:
         return this._Dxyn(opcode);
       default:
         throw new Error(`${opcode.pretty} not implemented`);
@@ -404,24 +382,4 @@ export class Emulator {
   _Fx55(opcode: Opcode): void {}
 
   _Fx65(opcode: Opcode): void {}
-
-  _00Cn(opcode: Opcode): void {}
-
-  _00FB(opcode: Opcode): void {}
-
-  _00FC(opcode: Opcode): void {}
-
-  _00FD(opcode: Opcode): void {}
-
-  _00FE(opcode: Opcode): void {}
-
-  _00FF(opcode: Opcode): void {}
-
-  _Dxy0(opcode: Opcode): void {}
-
-  _Fx30(opcode: Opcode): void {}
-
-  _Fx75(opcode: Opcode): void {}
-
-  _Fx85(opcode: Opcode): void {}
 }

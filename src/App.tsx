@@ -1,6 +1,13 @@
 import React from 'react';
 import _ from 'lodash';
-import { Flex, Box, Button, HStack, VStack } from '@chakra-ui/react';
+import {
+  Flex,
+  Box,
+  Button,
+  HStack,
+  VStack,
+  ButtonGroup,
+} from '@chakra-ui/react';
 import type { Emulator } from './emulator/emulator';
 import { Header } from './components/header/Header';
 import { Debug } from './components/debug/Debug';
@@ -86,15 +93,11 @@ export const App = (props: Props) => {
       </Flex>
       <Flex justify="center">
         <HStack>
-          <Button colorScheme="green" onClick={toggle}>
-            {started() ? 'Pause' : 'Run'}
-          </Button>
-          <Button colorScheme="green" onClick={onStep}>
-            Step
-          </Button>
-          <Button colorScheme="green" onClick={onReset}>
-            Reset
-          </Button>
+          <ButtonGroup size="md" colorScheme="green">
+            <Button onClick={toggle}>{started() ? 'Pause' : 'Run'}</Button>
+            <Button onClick={onStep}>Step</Button>
+            <Button onClick={onReset}>Reset</Button>
+          </ButtonGroup>
         </HStack>
       </Flex>
     </Box>

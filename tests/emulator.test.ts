@@ -1,13 +1,14 @@
 import * as _ from 'lodash';
 import { expect } from 'chai';
 import { Emulator } from '../src/emulator/emulator';
+import { parseOpcode } from 'src/emulator/opcode';
 
 describe('0 series opcodes', () => {});
 
 describe('1nnn', () => {
   it('1nnn - The interpreter sets the program counter to nnn', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x1234);
+    const opcode = parseOpcode(0x1234);
     emulator._1nnn(opcode);
 
     expect(emulator.pc).to.equal(opcode.nnn);
@@ -18,7 +19,7 @@ describe('2nnn', () => {
   it('2nnn - Call subroutine at nnn.', () => {
     const emulator = new Emulator();
     const initialState = _.cloneDeep(emulator);
-    const opcode = Emulator.parseOpcode(0x2123);
+    const opcode = parseOpcode(0x2123);
     emulator._2nnn(opcode);
 
     expect(emulator.sp).to.equal(initialState.sp + 1);
@@ -32,7 +33,7 @@ describe('2nnn', () => {
 describe('3xkk - both outcomes', () => {
   it('3xkk - if V[x] === kk', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x3123);
+    const opcode = parseOpcode(0x3123);
     emulator.v[opcode.x] = 0x23;
     const initialState = _.cloneDeep(emulator);
     emulator._3xkk(opcode);
@@ -43,7 +44,7 @@ describe('3xkk - both outcomes', () => {
 
   it('3xkk - if V[x] !== kk', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x3123);
+    const opcode = parseOpcode(0x3123);
     emulator.v[opcode.x] = 0x24;
     const initialState = _.cloneDeep(emulator);
     emulator._3xkk(opcode);
@@ -56,7 +57,7 @@ describe('3xkk - both outcomes', () => {
 describe('4xkk - both outcomes', () => {
   it('4xkk - if V[x] !== kk', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x4123);
+    const opcode = parseOpcode(0x4123);
     emulator.v[opcode.x] = 0x24;
     const initialState = _.cloneDeep(emulator);
     emulator._4xkk(opcode);
@@ -67,7 +68,7 @@ describe('4xkk - both outcomes', () => {
 
   it('4xkk - if V[x] === kk', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x4123);
+    const opcode = parseOpcode(0x4123);
     emulator.v[opcode.x] = 0x23;
     const initialState = _.cloneDeep(emulator);
     emulator._4xkk(opcode);
@@ -80,7 +81,7 @@ describe('4xkk - both outcomes', () => {
 describe('5xyo - both outcomes', () => {
   it('5xy0 - V[x] === V[y]', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x4123);
+    const opcode = parseOpcode(0x4123);
     emulator.v[opcode.x] = 0x5;
     emulator.v[opcode.y] = 0x5;
     const initialState = _.cloneDeep(emulator);
@@ -92,7 +93,7 @@ describe('5xyo - both outcomes', () => {
 
   it('5xy0 - V[x] !== V[y]', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x4123);
+    const opcode = parseOpcode(0x4123);
     emulator.v[opcode.x] = 0x5;
     emulator.v[opcode.y] = 0x4;
     const initialState = _.cloneDeep(emulator);
@@ -105,7 +106,7 @@ describe('5xyo - both outcomes', () => {
   describe('6xkk', () => {
     it('6xkk - Set V[x] = kk ', () => {
       const emulator = new Emulator();
-      const opcode = Emulator.parseOpcode(0x6123);
+      const opcode = parseOpcode(0x6123);
       const initialState = _.cloneDeep(emulator);
       emulator._6xkk(opcode);
 
@@ -118,7 +119,7 @@ describe('5xyo - both outcomes', () => {
     it('7xkk - Set V[x] = V[x] + kk', () => {
       // Note V[x] + kk in this case is = 0x4(4) + 0x23(35) === opcode.kk(0x27 = 39)
       const emulator = new Emulator();
-      const opcode = Emulator.parseOpcode(0x7123);
+      const opcode = parseOpcode(0x7123);
       emulator.v[opcode.x] = 0x4;
       const initialState = _.cloneDeep(emulator);
       emulator._7xkk(opcode);
@@ -133,7 +134,7 @@ describe('5xyo - both outcomes', () => {
   describe('Annn', () => {
     it('Annn - Set I = nnn', () => {
       const emulator = new Emulator();
-      const opcode = Emulator.parseOpcode(0x6123);
+      const opcode = parseOpcode(0x6123);
       const initialState = _.cloneDeep(emulator);
       emulator._Annn(opcode);
 
@@ -146,7 +147,7 @@ describe('5xyo - both outcomes', () => {
 describe('8 series opcodes', () => {
   it('8xy0 - Set V[x] = V[y]', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8120);
+    const opcode = parseOpcode(0x8120);
     emulator.v[opcode.y] = 0x4;
     const initialState = _.cloneDeep(emulator);
     emulator._8xy0(opcode);
@@ -157,7 +158,7 @@ describe('8 series opcodes', () => {
 
   it('8xy1 - Set Vx = Vx OR Vy', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8121);
+    const opcode = parseOpcode(0x8121);
     emulator.v[opcode.x] = 0x8;
     emulator.v[opcode.y] = 0x7;
     const initialState = _.cloneDeep(emulator);
@@ -171,7 +172,7 @@ describe('8 series opcodes', () => {
 
   it('8xy2 - Set Vx = Vx AND Vy', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8122);
+    const opcode = parseOpcode(0x8122);
     emulator.v[opcode.x] = 0x8;
     emulator.v[opcode.y] = 0x7;
     const initialState = _.cloneDeep(emulator);
@@ -185,7 +186,7 @@ describe('8 series opcodes', () => {
 
   it('8xy3 - Set Vx = Vx XOR Vy', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8673);
+    const opcode = parseOpcode(0x8673);
     emulator.v[opcode.x] = 0x7;
     emulator.v[opcode.y] = 0x5;
     const initialState = _.cloneDeep(emulator);
@@ -199,7 +200,7 @@ describe('8 series opcodes', () => {
 
   it('8xy4 - Set Vx = Vx + Vy, set VF = carry - If result of V[x] > 255, set V[f] to 1', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8674);
+    const opcode = parseOpcode(0x8674);
     emulator.v[opcode.x] = 0x80;
     emulator.v[opcode.y] = 0x80;
     const result = emulator.v[opcode.x] + emulator.v[opcode.y];
@@ -213,7 +214,7 @@ describe('8 series opcodes', () => {
 
   it('8xy4 - Set Vx = Vx + Vy, set VF = carry - If result of V[x] < 255, set V[f] to 0', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8674);
+    const opcode = parseOpcode(0x8674);
     emulator.v[opcode.x] = 0x80;
     emulator.v[opcode.y] = 0x50;
     const result = emulator.v[opcode.x] + emulator.v[opcode.y];
@@ -227,7 +228,7 @@ describe('8 series opcodes', () => {
 
   it('8xy5 - Set Vx = Vx - Vy, set VF = NOT borrow - If V[x] > V[y], set V[f] to 1', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8675);
+    const opcode = parseOpcode(0x8675);
     emulator.v[opcode.x] = 0x80;
     emulator.v[opcode.y] = 0x50;
     const initialState = _.cloneDeep(emulator);
@@ -240,7 +241,7 @@ describe('8 series opcodes', () => {
 
   it('8xy5 - Set Vx = Vx - Vy, set VF = NOT borrow - If V[x] < V[y], set V[f] to 0', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8675);
+    const opcode = parseOpcode(0x8675);
     emulator.v[opcode.x] = 0x50;
     emulator.v[opcode.y] = 0x60;
     const initialState = _.cloneDeep(emulator);
@@ -253,7 +254,7 @@ describe('8 series opcodes', () => {
 
   it('8xy6 - Set Vx = Vx SHR 1. - If lsb of V[x] is 1, set V[f] to 1', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8676);
+    const opcode = parseOpcode(0x8676);
     emulator.v[opcode.x] = 0x1;
     const initialState = _.cloneDeep(emulator);
     emulator._8xy6(opcode);
@@ -265,7 +266,7 @@ describe('8 series opcodes', () => {
 
   it('8xy6 - Set Vx = Vx SHR 1. - If lsb of V[x] is not 1, set V[f] to 0', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8676);
+    const opcode = parseOpcode(0x8676);
     emulator.v[opcode.x] = 0x4;
     const initialState = _.cloneDeep(emulator);
     emulator._8xy6(opcode);
@@ -277,7 +278,7 @@ describe('8 series opcodes', () => {
 
   it('8xy7 - Set Vx = Vy - Vx, set VF = NOT borrow - If V[y] > V[x], set V[f] to 1', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8687);
+    const opcode = parseOpcode(0x8687);
     emulator.v[opcode.y] = 0x8;
     emulator.v[opcode.x] = 0x5;
     const initialState = _.cloneDeep(emulator);
@@ -292,7 +293,7 @@ describe('8 series opcodes', () => {
 
   it('8xy7 - Set Vx = Vy - Vx, set VF = NOT borrow - If V[y] < V[x], set V[f] to 0', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x8687);
+    const opcode = parseOpcode(0x8687);
     emulator.v[opcode.y] = 0x5;
     emulator.v[opcode.x] = 0x8;
     const initialState = _.cloneDeep(emulator);
@@ -307,7 +308,7 @@ describe('8 series opcodes', () => {
 
   it('8xyE - Set Vx = Vx SHL 1 - If msb of V[x] is 1, set V[f] to 1', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x843e);
+    const opcode = parseOpcode(0x843e);
     emulator.v[opcode.x] = 0x80; // 0x80 is equal to 128, whereby msb is 1
     const initialState = _.cloneDeep(emulator);
     emulator._8xyE(opcode);
@@ -319,7 +320,7 @@ describe('8 series opcodes', () => {
 
   it('8xyE - Set Vx = Vx SHL 1 - If msb of V[x] is not 1, set V[f] to 0', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x843e);
+    const opcode = parseOpcode(0x843e);
     emulator.v[opcode.x] = 0x11;
     const initialState = _.cloneDeep(emulator);
     emulator._8xyE(opcode);
@@ -333,7 +334,7 @@ describe('8 series opcodes', () => {
 describe('9xy0', () => {
   it('9xy0 - Skip next instruction if Vx != Vy, PC += 4', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x9450);
+    const opcode = parseOpcode(0x9450);
     emulator.v[opcode.x] = 0x7;
     emulator.v[opcode.y] = 0x5;
     const initialState = _.cloneDeep(emulator);
@@ -345,7 +346,7 @@ describe('9xy0', () => {
 
   it('9xy0 - Skip next instruction if Vx === Vy, PC += 2', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0x9450);
+    const opcode = parseOpcode(0x9450);
     emulator.v[opcode.x] = 0x7;
     emulator.v[opcode.y] = 0x7;
     const initialState = _.cloneDeep(emulator);
@@ -359,7 +360,7 @@ describe('9xy0', () => {
 describe.only('Annn', () => {
   it('Annn - Set I = nnn.', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0xa123);
+    const opcode = parseOpcode(0xa123);
     const initialState = _.cloneDeep(emulator);
     emulator._Annn(opcode);
 
@@ -371,7 +372,7 @@ describe.only('Annn', () => {
 describe.only('Bnnn', () => {
   it('Bnnn - Jump to location nnn + V0', () => {
     const emulator = new Emulator();
-    const opcode = Emulator.parseOpcode(0xb123);
+    const opcode = parseOpcode(0xb123);
     emulator.v[0x0] = 0x33;
     emulator._Bnnn(opcode);
 

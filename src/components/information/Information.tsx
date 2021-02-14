@@ -1,15 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
-import { RomSelector } from './RomSelector';
-import {
-  Box,
-  Text,
-  Kbd,
-  Flex,
-  SimpleGrid,
-  VStack,
-  Center,
-} from '@chakra-ui/react';
+import { RomSelector } from './Roms';
+import { Text, Kbd, Flex, SimpleGrid, VStack } from '@chakra-ui/react';
 
 interface Props {
   value?: string;

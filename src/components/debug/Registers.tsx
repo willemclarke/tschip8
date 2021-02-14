@@ -39,7 +39,7 @@ export const Registers = (props: Props) => {
   });
 
   const registers = (
-    <VStack align="start">
+    <VStack align="start" spacing={1}>
       <HStack>
         <Text>{`PC:`}</Text>
         <Text>{trace.pc.toString(16)}</Text>
