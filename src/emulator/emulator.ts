@@ -1,15 +1,20 @@
 import _ from 'lodash';
+import { Mnemonic, parseOpcode } from './opcode';
 
-export interface Trace {
-  opcode: Opcode;
+export interface OpcodeSummary {
+  previous: DebugInfo[];
+  current: Opcode;
+  next: DebugInfo[];
+}
+
+export interface DebugInfo {
   pc: number;
-  i: number;
-  v: number[];
-  sp: number;
-  stack: number[];
+  opcode: Opcode;
 }
 
 export interface Opcode {
+  mnemonic: Mnemonic;
+  description: string;
   pretty: string;
   hi: number;
   lo: number;
@@ -22,6 +27,17 @@ export interface Opcode {
   i: number;
 }
 
+export interface Trace {
+  opcode: Opcode;
+  pc: number;
+  i: number;
+  v: number[];
+
+  sp: number;
+  stack: number[];
+  opcodeSummary: OpcodeSummary;
+}
+
 export class Emulator {
   memory: number[];
   pc: number;
@@ -29,11 +45,12 @@ export class Emulator {
   stack: number[];
   v: number[];
   i: number;
+  keyInput: { [key: number]: boolean };
   scale: number;
   width: number;
   height: number;
   screen: number[][];
-  traces: Trace[];
+  trace: Trace;
 
   constructor() {
     this.reset();
@@ -46,113 +63,142 @@ export class Emulator {
     this.stack = [];
     this.v = Array(0x10).fill(0);
     this.i = 0;
+    this.keyInput = {
+      0x1: false, // 1
+      0x2: false, // 2
+      0x3: false, // 3
+      0xc: false, // 4
+      0x4: false, // Q
+      0x5: false, // W
+      0x6: false, // E
+      0xd: false, // R
+      0x7: false, // A
+      0x8: false, // S
+      0x9: false, // D
+      0xe: false, // F
+      0xa: false, // Z
+      0x0: false, // X
+      0xb: false, // C
+      0xf: false, // V
+    };
     this.scale = 10;
     this.width = 64;
     this.height = 32;
     this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
-    this.traces = [];
   }
 
-  step() {
-    const nextOpcodeValue = this.getNextOpcode();
-    const parsedOpcode = Emulator.parseOpcode(nextOpcodeValue);
-    this.addTrace(parsedOpcode);
-    this.executeOpcode(parsedOpcode);
+  step(): void {
+    const nextOpcode = this.getNextOpcode();
+    this.executeOpcode(nextOpcode);
   }
 
-  loadRom(rom: ArrayBuffer) {
+  loadRom(rom: ArrayBuffer): void {
     this.memory = Array(0x200)
       .fill(0x0)
       .concat(...new Uint8Array(rom));
   }
 
-  getNextOpcode() {
-    return (this.memory[this.pc] << 8) | this.memory[this.pc + 1];
+  getWord16(address: number): number {
+    return (this.memory[address] << 8) | this.memory[address + 1];
   }
 
-  addTrace(opcode: Opcode) {
-    const newTrace = {
+  getNextOpcode(): Opcode {
+    return parseOpcode(this.getWord16(this.pc));
+  }
+
+  getOpcodeSummary(opcode: Opcode, pc: number): OpcodeSummary {
+    const previous = _.chain(_.range(1, 11))
+      .map((i) => {
+        return {
+          opcode: parseOpcode(this.getWord16(pc - i * 2)),
+          pc: pc - i * 2,
+        };
+      })
+      .filter((item) => item.opcode.pretty !== '0x0')
+      .reverse()
+      .value();
+
+    const next = _.chain(_.range(1, 11))
+      .map((i) => {
+        return {
+          opcode: parseOpcode(this.getWord16(pc + i * 2)),
+          pc: pc + i * 2,
+        };
+      })
+      .filter((item) => item.opcode.pretty !== '0x0')
+      .value();
+
+    return {
+      previous,
+      current: opcode,
+      next,
+    };
+  }
+
+  getTrace(): Trace {
+    const opcode = this.getNextOpcode();
+    console.log('testing wun two ', opcode.pretty);
+    const opcodeSummary = this.getOpcodeSummary(opcode, this.pc);
+
+    return {
       opcode,
       pc: this.pc,
       i: this.i,
       v: this.v,
       sp: this.sp,
       stack: this.stack,
-    };
-    this.traces.push(newTrace);
-
-    if (this.traces.length > 10) {
-      this.traces.shift();
-    }
-  }
-
-  static parseOpcode(raw: number): Opcode {
-    const pretty = '0x' + raw.toString(16).toUpperCase();
-    const hi = (raw & 0xff00) >> 8;
-    const lo = raw & 0x00ff;
-    const nnn = raw & 0x0fff;
-    const n = raw & 0x000f;
-    const x = (raw & 0x0f00) >> 8;
-    const y = (raw & 0x00f0) >> 4;
-    const kk = raw & 0x00ff;
-    const i = (raw & 0xf000) >> 12;
-
-    return {
-      hi,
-      lo,
-      nnn,
-      n,
-      x,
-      y,
-      kk,
-      i,
-      raw,
-      pretty,
+      opcodeSummary,
     };
   }
 
   executeOpcode(opcode: Opcode): void {
     // console.log(`executing opcode: ${opcode.pretty}`);
-    switch (opcode.i) {
-      case 0x0:
-        switch (opcode.kk) {
-          case 0x00e0:
-            return this._00E0();
-        }
-      case 0x1:
+    switch (opcode.mnemonic) {
+      case Mnemonic['00E0']:
+        return this._00E0();
+      case Mnemonic['00EE']:
+        return this._00EE(opcode);
+      case Mnemonic['1NNN']:
         return this._1nnn(opcode);
-      case 0x6:
+      case Mnemonic['2NNN']:
+        return this._2nnn(opcode);
+      case Mnemonic['3XKK']:
+        return this._3xkk(opcode);
+      case Mnemonic['4XKK']:
+        return this._4xkk(opcode);
+      case Mnemonic['5XY0']:
+        return this._5xy0(opcode);
+      case Mnemonic['6XKK']:
         return this._6xkk(opcode);
-      case 0x7:
+      case Mnemonic['7XKK']:
         return this._7xkk(opcode);
-      case 0x8:
-        switch (opcode.n) {
-          case 0x0:
-            return this._8xy0(opcode);
-          case 0x0001:
-            return this._8xy1(opcode);
-          case 0x0002:
-            return this._8xy2(opcode);
-          case 0x0003:
-            return this._8xy3(opcode);
-          case 0x0004:
-            return this._8xy3(opcode);
-          case 0x0005:
-            return this._8xy5(opcode);
-          case 0x0006:
-            return this._8xy6(opcode);
-          case 0x0007:
-            return this._8xy7(opcode);
-          case 0x000e:
-            return this._8xyE(opcode);
-        }
-      case 0x9:
+      case Mnemonic['8XY0']:
+        return this._8xy0(opcode);
+      case Mnemonic['8XY1']:
+        return this._8xy1(opcode);
+      case Mnemonic['8XY2']:
+        return this._8xy2(opcode);
+      case Mnemonic['8XY3']:
+        return this._8xy3(opcode);
+      case Mnemonic['8XY4']:
+        return this._8xy4(opcode);
+      case Mnemonic['8XY5']:
+        return this._8xy5(opcode);
+      case Mnemonic['8XY6']:
+        return this._8xy6(opcode);
+      case Mnemonic['8XY7']:
+        return this._8xy7(opcode);
+      case Mnemonic['8XYE']:
+        return this._8xyE(opcode);
+      case Mnemonic['9XY0']:
         return this._9xy0(opcode);
-      case 0xa:
+      case Mnemonic['ANNN']:
         return this._Annn(opcode);
-      case 0xb:
+      case Mnemonic['BNNN']:
         return this._Bnnn(opcode);
-      case 0xd:
+      case Mnemonic['CXKK']:
+        return this._Cxkk(opcode);
+      case Mnemonic['DXYN']:
         return this._Dxyn(opcode);
       default:
         throw new Error(`${opcode.pretty} not implemented`);
@@ -160,15 +206,14 @@ export class Emulator {
   }
 
   _00E0(): void {
-    for (let x = 0; x < this.screen.length; x++) {
-      for (let y = 0; y < this.screen.length; y++) {
-        this.screen[x][y] = 0;
-      }
-    }
+    this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
     this.pc += 2;
   }
 
-  _00EE(opcode: Opcode): void {}
+  _00EE(opcode: Opcode): void {
+    this.pc = this.stack.pop() as number;
+    this.sp -= 1;
+  }
 
   _1nnn(opcode: Opcode): void {
     this.pc = opcode.nnn;
@@ -284,6 +329,7 @@ export class Emulator {
 
   _8xyE(opcode: Opcode): void {
     const msb = (this.v[opcode.x] & 0xff) >> 7;
+
     if (msb === 1) {
       this.v[0xf] = 1;
     } else {
@@ -313,38 +359,38 @@ export class Emulator {
   _Cxkk(opcode: Opcode): void {}
 
   _Dxyn(opcode: Opcode): void {
-    let row,
-      col,
-      sprite,
-      width = 8,
-      height = opcode.n;
+    // let row,
+    //   col,
+    //   sprite,
+    //   width = 8,
+    //   height = opcode.n;
 
-    this.v[0xf] = 0;
+    // this.v[0xf] = 0;
 
-    for (row = 0; row < height; row++) {
-      sprite = this.memory[this.i + row];
+    // for (row = 0; row < height; row++) {
+    //   sprite = this.memory[this.i + row];
 
-      for (col = 0; col < width; col++) {
-        if ((sprite & 0x80) > 0) {
-          this.screen[this.v[opcode.y] + row][this.v[opcode.x] + col] = 1;
+    //   for (col = 0; col < width; col++) {
+    //     if ((sprite & 0x80) > 0) {
+    //       this.screen[this.v[opcode.y] + row][this.v[opcode.x] + col] = 1;
 
-          const int_x = (this.v[opcode.x] + col) & 0xff;
-          const int_y = (this.v[opcode.y] + row) & 0xff;
+    //       const int_x = (this.v[opcode.x] + col) & 0xff;
+    //       const int_y = (this.v[opcode.y] + row) & 0xff;
 
-          const previousPixel = this.screen[int_y][int_x];
-          const newPixel =
-            previousPixel ^ (((sprite & (1 << (7 - this.i))) != 0) as any); // XOR
+    //       const previousPixel = this.screen[int_y][int_x];
+    //       const newPixel =
+    //         previousPixel ^ (((sprite & (1 << (7 - this.i))) != 0) as any); // XOR
 
-          this.screen[int_y][int_x] = 1;
+    //       this.screen[int_y][int_x] = 1;
 
-          if (previousPixel && !newPixel) {
-            this.v[0xf] = 0x01;
-          }
-        }
+    //       if (previousPixel && !newPixel) {
+    //         this.v[0xf] = 0x01;
+    //       }
+    //     }
 
-        sprite = sprite << 1;
-      }
-    }
+    //     sprite = sprite << 1;
+    //   }
+    // }
 
     this.pc += 2;
   }
@@ -370,24 +416,4 @@ export class Emulator {
   _Fx55(opcode: Opcode): void {}
 
   _Fx65(opcode: Opcode): void {}
-
-  _00Cn(opcode: Opcode): void {}
-
-  _00FB(opcode: Opcode): void {}
-
-  _00FC(opcode: Opcode): void {}
-
-  _00FD(opcode: Opcode): void {}
-
-  _00FE(opcode: Opcode): void {}
-
-  _00FF(opcode: Opcode): void {}
-
-  _Dxy0(opcode: Opcode): void {}
-
-  _Fx30(opcode: Opcode): void {}
-
-  _Fx75(opcode: Opcode): void {}
-
-  _Fx85(opcode: Opcode): void {}
 }

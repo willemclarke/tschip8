@@ -4,32 +4,32 @@ import type { Trace } from '../../emulator/emulator';
 import { VStack, Text, HStack, Box, Spacer } from '@chakra-ui/react';
 
 interface Props {
-  processedTrace: Trace | undefined;
+  trace: Trace;
 }
 
+const vRegisterIndexes = [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+];
+
 export const Registers = (props: Props) => {
-  const { processedTrace } = props;
+  const { trace } = props;
 
-  const vRegisterIndexes = [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-  ];
-
-  const vRegisters = _.map(processedTrace?.v, (register, index) => {
+  const vRegisters = _.map(trace.v, (register, index) => {
     return (
       <HStack key={`V[${vRegisterIndexes[index]}}]`}>
         <Text>{`V[${vRegisterIndexes[index]}]:`}</Text>
@@ -39,15 +39,15 @@ export const Registers = (props: Props) => {
   });
 
   const registers = (
-    <VStack align="start">
+    <VStack align="start" spacing={1}>
       <HStack>
         <Text>{`PC:`}</Text>
-        <Text>{processedTrace?.pc.toString(16)}</Text>
+        <Text>{trace.pc.toString(16).toUpperCase()}</Text>
       </HStack>
       <HStack>
         <Text>IR:</Text>
         <Spacer pr={2} />
-        <Text>{processedTrace?.i}</Text>
+        <Text>{trace.i.toString(16).toUpperCase()}</Text>
       </HStack>
       {vRegisters}
       <HStack>
