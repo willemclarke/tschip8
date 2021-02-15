@@ -45,10 +45,10 @@ export const parseOpcode = (raw: number): Opcode => {
   const lo = raw & 0x00ff;
   const nnn = raw & 0x0fff;
   const n = raw & 0x000f;
-  const x = (raw & 0x0f00) >> 8;
   const y = (raw & 0x00f0) >> 4;
-  const kk = raw & 0x00ff;
+  const x = (raw & 0x0f00) >> 8;
   const i = (raw & 0xf000) >> 12;
+  const kk = raw & 0x00ff;
   const { mnemonic, description } = parseOpcodeMnemonic(raw);
 
   return {

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { catchError } from './util';
 import { Mnemonic, parseOpcode } from './opcode';
 
 export interface OpcodeSummary {
@@ -108,23 +109,25 @@ export class Emulator {
 
   getOpcodeSummary(opcode: Opcode, pc: number): OpcodeSummary {
     const previous = _.chain(_.range(1, 11))
-      .map((i) => {
-        return {
+      .map((i) =>
+        catchError(() => ({
           opcode: parseOpcode(this.getWord16(pc - i * 2)),
           pc: pc - i * 2,
-        };
-      })
+        })),
+      )
+      .compact()
       .filter((item) => item.opcode.pretty !== '0x0')
       .reverse()
       .value();
 
     const next = _.chain(_.range(1, 11))
-      .map((i) => {
-        return {
-          opcode: parseOpcode(this.getWord16(pc + i * 2)),
+      .map((i) =>
+        catchError(() => ({
+          opcode: parseOpcode(this.getWord16(pc - i * 2)),
           pc: pc + i * 2,
-        };
-      })
+        })),
+      )
+      .compact()
       .filter((item) => item.opcode.pretty !== '0x0')
       .value();
 
@@ -137,7 +140,6 @@ export class Emulator {
 
   getTrace(): Trace {
     const opcode = this.getNextOpcode();
-    console.log('testing wun two ', opcode.pretty);
     const opcodeSummary = this.getOpcodeSummary(opcode, this.pc);
 
     return {
@@ -152,7 +154,6 @@ export class Emulator {
   }
 
   executeOpcode(opcode: Opcode): void {
-    // console.log(`executing opcode: ${opcode.pretty}`);
     switch (opcode.mnemonic) {
       case Mnemonic['00E0']:
         return this._00E0();
@@ -359,38 +360,29 @@ export class Emulator {
   _Cxkk(opcode: Opcode): void {}
 
   _Dxyn(opcode: Opcode): void {
-    // let row,
-    //   col,
-    //   sprite,
-    //   width = 8,
-    //   height = opcode.n;
+    const width = 8;
+    const height = opcode.raw & 0xf;
 
-    // this.v[0xf] = 0;
+    this.v[0xf] = 0;
 
-    // for (row = 0; row < height; row++) {
-    //   sprite = this.memory[this.i + row];
+    for (let row = 0; row < height; row++) {
+      let sprite = this.memory[this.i + row];
 
-    //   for (col = 0; col < width; col++) {
-    //     if ((sprite & 0x80) > 0) {
-    //       this.screen[this.v[opcode.y] + row][this.v[opcode.x] + col] = 1;
+      for (let col = 0; col < width; col++) {
+        // If the bit (sprite) is not 0, render/erase the pixel
+        if ((sprite & 0x80) > 0) {
+          const x = this.v[opcode.x] + col;
+          const y = this.v[opcode.y] + row;
+          this.screen[x][y] ^= 1;
 
-    //       const int_x = (this.v[opcode.x] + col) & 0xff;
-    //       const int_y = (this.v[opcode.y] + row) & 0xff;
-
-    //       const previousPixel = this.screen[int_y][int_x];
-    //       const newPixel =
-    //         previousPixel ^ (((sprite & (1 << (7 - this.i))) != 0) as any); // XOR
-
-    //       this.screen[int_y][int_x] = 1;
-
-    //       if (previousPixel && !newPixel) {
-    //         this.v[0xf] = 0x01;
-    //       }
-    //     }
-
-    //     sprite = sprite << 1;
-    //   }
-    // }
+          // If the pixel was erased, set VF to 1
+          if (this.screen[x][y]) {
+            this.v[0xf] = 1;
+          }
+        }
+        sprite <<= 1;
+      }
+    }
 
     this.pc += 2;
   }
