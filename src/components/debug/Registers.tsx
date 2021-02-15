@@ -42,12 +42,12 @@ export const Registers = (props: Props) => {
     <VStack align="start" spacing={1}>
       <HStack>
         <Text>{`PC:`}</Text>
-        <Text>{trace.pc.toString(16)}</Text>
+        <Text>{trace.pc.toString(16).toUpperCase()}</Text>
       </HStack>
       <HStack>
         <Text>IR:</Text>
         <Spacer pr={2} />
-        <Text>{trace.i}</Text>
+        <Text>{trace.i.toString(16).toUpperCase()}</Text>
       </HStack>
       {vRegisters}
       <HStack>

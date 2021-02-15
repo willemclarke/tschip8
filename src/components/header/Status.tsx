@@ -17,7 +17,7 @@ export const Status = (props: Props) => {
     <Box px={4} pt={3}>
       <HStack>
         <HStack>
-          <Text>Processed opcode:</Text>
+          <Text>Current opcode:</Text>
           <Text fontWeight="bolder" color="green.700">
             {currentTrace}
           </Text>

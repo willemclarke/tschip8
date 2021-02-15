@@ -12,10 +12,12 @@ export const Memory = (props: Props) => {
 
   const previous = _.map(trace.opcodeSummary.previous, (summary, index) => {
     return (
-      <HStack key={`${summary.raw}-${index}`} spacing={4}>
-        <Text>{summary.pretty}</Text>
+      <HStack key={`${summary.opcode.raw}-${index}`} spacing={4}>
+        <Text>{`0x${summary.pc.toString(16)}`}</Text>
         <Spacer />
-        <Text>{summary.description}</Text>
+        <Text>{summary.opcode.pretty}</Text>
+        <Spacer />
+        <Text>{summary.opcode.description}</Text>
       </HStack>
     );
   });
@@ -30,6 +32,18 @@ export const Memory = (props: Props) => {
     </HStack>
   );
 
+  const next = _.map(trace.opcodeSummary.next, (summary, index) => {
+    return (
+      <HStack key={`${summary.opcode.raw}-${index}`} spacing={4}>
+        <Text>{`0x${summary.pc.toString(16)}`}</Text>
+        <Spacer />
+        <Text>{summary.opcode.pretty}</Text>
+        <Spacer />
+        <Text>{summary.opcode.description}</Text>
+      </HStack>
+    );
+  });
+
   return (
     <Box w={500}>
       <Text fontWeight="bold" fontSize="xl">
@@ -38,6 +52,7 @@ export const Memory = (props: Props) => {
       <VStack align="start" spacing={1}>
         {previous}
         {current}
+        {next}
       </VStack>
     </Box>
   );

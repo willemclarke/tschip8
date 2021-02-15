@@ -121,7 +121,7 @@ export const parseOpcodeMnemonic = (
     case 0x7:
       return {
         mnemonic: Mnemonic['7XKK'],
-        description: 'ADD vx, byte',
+        description: 'ADD Vx, byte',
       };
     case 0x8:
       switch (raw & 0x000f) {
@@ -178,34 +178,34 @@ export const parseOpcodeMnemonic = (
       };
     case 0xa:
       return {
-        mnemonic: Mnemonic.ANNN,
+        mnemonic: Mnemonic['ANNN'],
         description: 'LD I, addr',
       };
     case 0xb:
       return {
-        mnemonic: Mnemonic.BNNN,
+        mnemonic: Mnemonic['BNNN'],
         description: 'JP V0, addr',
       };
     case 0xc:
       return {
-        mnemonic: Mnemonic.CXKK,
+        mnemonic: Mnemonic['CXKK'],
         description: 'RND Vx, byte',
       };
     case 0xd:
       return {
-        mnemonic: Mnemonic.DXYN,
+        mnemonic: Mnemonic['DXYN'],
         description: 'DRW Vx, Vy, nibble',
       };
     case 0xe:
       switch (raw & 0x00ff) {
         case 0x009e:
           return {
-            mnemonic: Mnemonic.EX9E,
+            mnemonic: Mnemonic['EX9E'],
             description: 'SKP Vx',
           };
         case 0x00a1:
           return {
-            mnemonic: Mnemonic.EXA1,
+            mnemonic: Mnemonic['EXA1'],
             description: 'SKNP Vx',
           };
       }
@@ -213,51 +213,51 @@ export const parseOpcodeMnemonic = (
       switch (raw & 0x00ff) {
         case 0x0007:
           return {
-            mnemonic: Mnemonic.FX07,
+            mnemonic: Mnemonic['FX07'],
             description: 'LD Vx, DT',
           };
         case 0x000a:
           return {
-            mnemonic: Mnemonic.FX0A,
+            mnemonic: Mnemonic['FX0A'],
             description: 'LD Vx, K',
           };
         case 0x0015:
           return {
-            mnemonic: Mnemonic.FX15,
+            mnemonic: Mnemonic['FX15'],
             description: 'LD DT, Vx',
           };
         case 0x0018:
           return {
-            mnemonic: Mnemonic.FX18,
+            mnemonic: Mnemonic['FX18'],
             description: 'LD ST, Vx',
           };
         case 0x001e:
           return {
-            mnemonic: Mnemonic.FX1E,
+            mnemonic: Mnemonic['FX1E'],
             description: 'ADD I, Vx',
           };
         case 0x0029:
           return {
-            mnemonic: Mnemonic.FX29,
+            mnemonic: Mnemonic['FX29'],
             description: 'LD F, Vx',
           };
         case 0x0033:
           return {
-            mnemonic: Mnemonic.FX33,
+            mnemonic: Mnemonic['FX33'],
             description: 'LD B, Vx',
           };
         case 0x0055:
           return {
-            mnemonic: Mnemonic.FX55,
+            mnemonic: Mnemonic['FX55'],
             description: 'LD [I], Vx',
           };
         case 0x0065:
           return {
-            mnemonic: Mnemonic.FX65,
+            mnemonic: Mnemonic['FX65'],
             description: 'LD Vx, [I]',
           };
       }
     default:
-      throw new Error('Couldnt parse mnemonic');
+      throw new Error(`Couldnt parse mnemonic for 0x${raw.toString(16)}`);
   }
 };
