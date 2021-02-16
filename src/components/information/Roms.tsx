@@ -47,11 +47,10 @@ export const RomSelector = (props: Props) => {
 
   return (
     <Select
-      p={1}
       placeholder="Select rom"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      variant="filled"
+      variant="flushed"
       fontWeight="bold"
       size="sm"
     >

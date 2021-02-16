@@ -33,7 +33,6 @@ export interface Trace {
   pc: number;
   i: number;
   v: number[];
-
   sp: number;
   stack: number[];
   opcodeSummary: OpcodeSummary;
@@ -123,7 +122,7 @@ export class Emulator {
     const next = _.chain(_.range(1, 11))
       .map((i) =>
         catchError(() => ({
-          opcode: parseOpcode(this.getWord16(pc - i * 2)),
+          opcode: parseOpcode(this.getWord16(pc + i * 2)),
           pc: pc + i * 2,
         })),
       )

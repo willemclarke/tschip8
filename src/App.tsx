@@ -1,5 +1,11 @@
 import React from 'react';
 import _ from 'lodash';
+import type { Emulator } from './emulator/emulator';
+import { Header } from './components/header/Header';
+import { Screen } from './components/Screen';
+import { Debug } from './components/debug/Debug';
+import { Information } from './components/information/Information';
+import { useRafLoop, useUpdate } from 'react-use';
 import {
   Flex,
   Box,
@@ -8,12 +14,6 @@ import {
   VStack,
   ButtonGroup,
 } from '@chakra-ui/react';
-import type { Emulator } from './emulator/emulator';
-import { Header } from './components/header/Header';
-import { Screen } from './components/Screen';
-import { Debug } from './components/debug/Debug';
-import { Information } from './components/information/Information';
-import { useRafLoop, useUpdate } from 'react-use';
 
 interface Props {
   emulator: Emulator;
@@ -74,21 +74,21 @@ export const App = (props: Props) => {
   };
 
   return (
-    <Box justifyContent="center" h="100%">
+    <Box justifyContent="center" h="100vh" bg="gray.100">
       <Header
         fps={fps}
         setFps={setFps}
         trace={emulator.getTrace()}
         started={started}
       />
-      <Flex py={4} px={150} h={700} justify="center" border="1px solid green">
-        <Box w={700} border="1px solid red">
+      <Flex py={2} px={150} h={600} justify="center">
+        <Box w={600} border="1px solid black">
           <VStack spacing={0}>
             <Screen screen={emulator.screen} pc={emulator.pc} />
             <Information value={rom} onChange={setRom} />
           </VStack>
         </Box>
-        <Box w={700} border="1px solid red">
+        <Box w={600} border="1px solid black">
           <Debug emulator={emulator} />
         </Box>
       </Flex>

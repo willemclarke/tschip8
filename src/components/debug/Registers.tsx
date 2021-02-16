@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import type { Trace } from '../../emulator/emulator';
-import { VStack, Text, HStack, Box, Spacer } from '@chakra-ui/react';
+import { VStack, Text, HStack, Box, Spacer, Divider } from '@chakra-ui/react';
 
 interface Props {
   trace: Trace;
@@ -32,21 +32,20 @@ export const Registers = (props: Props) => {
   const vRegisters = _.map(trace.v, (register, index) => {
     return (
       <HStack key={`V[${vRegisterIndexes[index]}}]`}>
-        <Text>{`V[${vRegisterIndexes[index]}]:`}</Text>
+        <Text>{`V${vRegisterIndexes[index]}:`}</Text>
         <Text>{register.toString(16)}</Text>
       </HStack>
     );
   });
 
   const registers = (
-    <VStack align="start" spacing={1}>
+    <VStack align="start" spacing={0}>
       <HStack>
         <Text>{`PC:`}</Text>
         <Text>{trace.pc.toString(16).toUpperCase()}</Text>
       </HStack>
       <HStack>
         <Text>IR:</Text>
-        <Spacer pr={2} />
         <Text>{trace.i.toString(16).toUpperCase()}</Text>
       </HStack>
       {vRegisters}
@@ -62,10 +61,17 @@ export const Registers = (props: Props) => {
   );
 
   return (
-    <Box w={150}>
-      <Text fontWeight="bold" fontSize="xl">
-        Registers
-      </Text>
+    <Box w={150} h={600}>
+      <VStack spacing={-1} align="start">
+        <Text fontWeight="bold" fontSize="xl">
+          Registers
+        </Text>
+        <HStack>
+          <Text fontWeight="bold">Reg</Text>
+          <Text fontWeight="bold">Value</Text>
+        </HStack>
+      </VStack>
+      <Divider my={2} />
       {registers}
     </Box>
   );

@@ -15,7 +15,7 @@ export const Debug = (props: Props) => {
   const trace = emulator.getTrace();
 
   return (
-    <Flex p={2} w={700}>
+    <Flex p={4} w={550}>
       <VStack>
         <Registers trace={trace} />
       </VStack>
