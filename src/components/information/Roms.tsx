@@ -52,7 +52,7 @@ export const RomSelector = (props: Props) => {
       onChange={(e) => onChange(e.target.value)}
       variant="flushed"
       fontWeight="bold"
-      size="sm"
+      size="md"
     >
       {options}
     </Select>

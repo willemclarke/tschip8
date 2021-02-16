@@ -35,6 +35,8 @@ export interface Trace {
   v: number[];
   sp: number;
   stack: number[];
+  st: number;
+  dt: number;
   opcodeSummary: OpcodeSummary;
 }
 
@@ -45,6 +47,8 @@ export class Emulator {
   stack: number[];
   v: number[];
   i: number;
+  st: number;
+  dt: number;
   keyInput: { [key: number]: boolean };
   scale: number;
   width: number;
@@ -63,6 +67,8 @@ export class Emulator {
     this.stack = [];
     this.v = Array(0x10).fill(0);
     this.i = 0;
+    this.st = 0;
+    this.dt = 0;
     this.keyInput = {
       0x1: false, // 1
       0x2: false, // 2
@@ -148,6 +154,8 @@ export class Emulator {
       v: this.v,
       sp: this.sp,
       stack: this.stack,
+      st: this.st,
+      dt: this.dt,
       opcodeSummary,
     };
   }
@@ -157,7 +165,7 @@ export class Emulator {
       case Mnemonic['00E0']:
         return this._00E0();
       case Mnemonic['00EE']:
-        return this._00EE(opcode);
+        return this._00EE();
       case Mnemonic['1NNN']:
         return this._1nnn(opcode);
       case Mnemonic['2NNN']:
@@ -197,9 +205,30 @@ export class Emulator {
       case Mnemonic['BNNN']:
         return this._Bnnn(opcode);
       case Mnemonic['CXKK']:
-        return this._Cxkk(opcode);
+        const randomNumber = Math.floor(Math.random() * 0xff);
+        return this._Cxkk(opcode, randomNumber);
       case Mnemonic['DXYN']:
         return this._Dxyn(opcode);
+      case Mnemonic['EX9E']:
+        return this._Ex9E(opcode);
+      case Mnemonic['EXA1']:
+        return this._ExA1(opcode);
+      case Mnemonic['FX07']:
+        return this._Fx07(opcode);
+      case Mnemonic['FX15']:
+        return this._Fx15(opcode);
+      case Mnemonic['FX18']:
+        return this._Fx18(opcode);
+      case Mnemonic['FX1E']:
+        return this._Fx1E(opcode);
+      case Mnemonic['FX29']:
+        return this._Fx29(opcode);
+      case Mnemonic['FX33']:
+        return this._Fx33(opcode);
+      case Mnemonic['FX55']:
+        return this._Fx55(opcode);
+      case Mnemonic['FX65']:
+        return this._Fx65(opcode);
       default:
         throw new Error(`${opcode.pretty} not implemented`);
     }
@@ -210,7 +239,7 @@ export class Emulator {
     this.pc += 2;
   }
 
-  _00EE(opcode: Opcode): void {
+  _00EE(): void {
     this.pc = this.stack.pop() as number;
     this.sp -= 1;
   }
@@ -356,7 +385,10 @@ export class Emulator {
     this.pc = opcode.nnn + this.v[0x0];
   }
 
-  _Cxkk(opcode: Opcode): void {}
+  _Cxkk(opcode: Opcode, randomNumber: number): void {
+    this.v[opcode.x] = randomNumber & opcode.kk;
+    this.pc += 2;
+  }
 
   _Dxyn(opcode: Opcode): void {
     const width = 8;
@@ -386,25 +418,71 @@ export class Emulator {
     this.pc += 2;
   }
 
-  _Ex9E(opcode: Opcode): void {}
+  _Ex9E(opcode: Opcode): void {
+    if (this.keyInput[this.v[opcode.x]]) {
+      this.pc += 4;
+    } else {
+      this.pc += 2;
+    }
+  }
 
-  _ExA1(opcode: Opcode): void {}
+  _ExA1(opcode: Opcode): void {
+    if (!this.keyInput[this.v[opcode.x]]) {
+      this.pc += 4;
+    } else {
+      this.pc += 2;
+    }
+  }
 
-  _Fx07(opcode: Opcode): void {}
+  _Fx07(opcode: Opcode): void {
+    this.v[opcode.x] = this.dt;
+    this.pc += 2;
+  }
 
+  // Note complete this opcode:
   _Fx0A(opcode: Opcode): void {}
 
-  _Fx15(opcode: Opcode): void {}
+  _Fx15(opcode: Opcode): void {
+    this.dt = this.v[opcode.x];
+    this.pc += 2;
+  }
 
-  _Fx18(opcode: Opcode): void {}
+  _Fx18(opcode: Opcode): void {
+    this.st = this.v[opcode.x];
+    this.pc += 2;
+  }
 
-  _Fx1E(opcode: Opcode): void {}
+  _Fx1E(opcode: Opcode): void {
+    this.i += this.v[opcode.x];
+    this.pc += 2;
+  }
 
-  _Fx29(opcode: Opcode): void {}
+  _Fx29(opcode: Opcode): void {
+    this.i = this.v[opcode.x] * 5;
+    this.pc += 2;
+  }
 
-  _Fx33(opcode: Opcode): void {}
+  _Fx33(opcode: Opcode): void {
+    const hundreds = Math.floor(this.v[opcode.x] / 100);
+    const tens = Math.floor((this.v[opcode.x] % 100) / 10);
+    const ones = (this.v[opcode.x] % 100) % 10;
 
-  _Fx55(opcode: Opcode): void {}
+    this.memory[this.i] = hundreds;
+    this.memory[this.i + 1] = tens;
+    this.memory[this.i + 2] = ones;
+    this.pc += 2;
+  }
 
-  _Fx65(opcode: Opcode): void {}
+  _Fx55(opcode: Opcode): void {
+    for (let registerIndex = 0; registerIndex <= opcode.x; registerIndex++) {
+      this.memory[this.i + registerIndex] = this.v[registerIndex];
+    }
+    this.pc += 2;
+  }
+
+  _Fx65(opcode: Opcode): void {
+    for (let registerIndex = 0; registerIndex <= opcode.x; registerIndex++) {
+      this.v[registerIndex] = this.memory[this.i + registerIndex];
+    }
+  }
 }

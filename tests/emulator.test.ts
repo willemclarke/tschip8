@@ -1,9 +1,31 @@
 import * as _ from 'lodash';
 import { expect } from 'chai';
 import { Emulator } from '../src/emulator/emulator';
-import { parseOpcode } from 'src/emulator/opcode';
+import { parseOpcode } from '../src/emulator/opcode';
 
-describe('0 series opcodes', () => {});
+describe('0 series opcodes', () => {
+  it('00E0 - Clear the display', () => {
+    const emulator = new Emulator();
+    emulator.screen = [[0x1, 0x2, 0x3]];
+    const initialState = _.cloneDeep(emulator);
+    emulator._00E0();
+
+    expect(emulator.screen).to.deep.equal(
+      [...Array(emulator.width)].map((e) => Array(emulator.height).fill(0)),
+    );
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('00EE - Return from subroutine', () => {
+    const emulator = new Emulator();
+    emulator.stack = [0x100, 0x200]; //= 512
+    const initialState = _.cloneDeep(emulator);
+    emulator._00EE();
+
+    expect(emulator.pc).to.equal(initialState.stack.pop());
+    expect(emulator.sp).to.equal(initialState.sp - 1);
+  });
+});
 
 describe('1nnn', () => {
   it('1nnn - The interpreter sets the program counter to nnn', () => {
@@ -357,7 +379,7 @@ describe('9xy0', () => {
   });
 });
 
-describe.only('Annn', () => {
+describe('Annn', () => {
   it('Annn - Set I = nnn.', () => {
     const emulator = new Emulator();
     const opcode = parseOpcode(0xa123);
@@ -369,7 +391,7 @@ describe.only('Annn', () => {
   });
 });
 
-describe.only('Bnnn', () => {
+describe('Bnnn', () => {
   it('Bnnn - Jump to location nnn + V0', () => {
     const emulator = new Emulator();
     const opcode = parseOpcode(0xb123);
@@ -378,4 +400,99 @@ describe.only('Bnnn', () => {
 
     expect(emulator.pc).to.equal(opcode.nnn + emulator.v[0x0]);
   });
+});
+
+describe('Cxkk', () => {
+  it('Cxkk - Set Vx = random byte AND kk.', () => {
+    const emulator = new Emulator();
+    const randomNumber = Math.floor(Math.random() * 0xff);
+    const opcode = parseOpcode(0xc470);
+    const initialState = _.cloneDeep(emulator);
+    emulator._Cxkk(opcode, randomNumber);
+
+    expect(emulator.v[opcode.x]).to.equal(randomNumber & opcode.kk);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+});
+
+describe('E series opcodes', () => {
+  it('Ex9e - Skip next instruction if key with the value of Vx is pressed', () => {});
+  it('Exa1 - Skip next instruction if key with the value of Vx is not pressed', () => {});
+});
+
+describe.only('F series opcodes', () => {
+  it('Fx07 - Set Vx = delay timer value', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xf207);
+    emulator.dt = 0x40;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Fx07(opcode);
+
+    expect(emulator.v[opcode.x]).to.equal(emulator.dt);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('Fx0A - Wait for a key press, store the value of the key in Vx', () => {});
+
+  it('Fx15 - Set delay timer = Vx', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xf215);
+    emulator.v[opcode.x] = 0x5;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Fx15(opcode);
+
+    expect(emulator.dt).to.equal(emulator.v[opcode.x]);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('Fx18 - Set sound timer = Vx', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xf218);
+    emulator.v[opcode.x] = 0x5;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Fx18(opcode);
+
+    expect(emulator.st).to.equal(emulator.v[opcode.x]);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('Fx1e - Set I = I + Vx', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xf21e);
+    emulator.i = 0x5;
+    emulator.v[opcode.x] = 0x2;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Fx1E(opcode);
+
+    expect(emulator.i).to.equal(initialState.i + emulator.v[opcode.x]);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('Fx29 - Set I = location of sprite for digit Vx', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xf129);
+    emulator.v[opcode.x] = 0x2;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Fx29(opcode);
+
+    expect(emulator.i).to.equal(initialState.v[opcode.x] * 5);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('Fx33 - Store BCD representation of Vx in memory locations I, I+1, and I+2.', () => {
+    const emulator = new Emulator();
+    const parsedOpcode = parseOpcode(0xf133);
+    emulator.v[parsedOpcode.x] = 0x200;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Fx33(parsedOpcode);
+
+    expect(emulator.memory[emulator.i]).to.equal(5);
+    expect(emulator.memory[emulator.i + 1]).to.equal(1);
+    expect(emulator.memory[emulator.i + 2]).to.equal(2);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('Fx55 - Store registers V0 through Vx in memory starting at location I', () => {});
+
+  it('Fx65 - Read registers V0 through Vx from memory starting at location I.', () => {});
 });

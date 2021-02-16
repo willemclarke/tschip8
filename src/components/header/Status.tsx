@@ -19,13 +19,13 @@ export const Status = (props: Props) => {
       <HStack>
         <HStack>
           <Text>Current opcode:</Text>
-          <Text fontWeight="bolder " color="green.700">
+          <Text fontWeight="extrabold" color="green.700">
             {currentTrace}
           </Text>
         </HStack>
         <HStack>
           <Text>Next opcode:</Text>
-          <Text fontWeight="bolder" color="green.700">
+          <Text fontWeight="extrabold" color="green.700">
             {nextOpcode}
           </Text>
         </HStack>

@@ -20,7 +20,7 @@ export const Header = (props: Props) => {
         <Text
           fontSize="2xl"
           fontWeight="extrabold"
-          bgGradient="linear(to-r, green.600, green.700)"
+          bgGradient="linear(to-r, green.500, green.600)"
           bgClip="text"
         >
           tschip8
@@ -28,10 +28,10 @@ export const Header = (props: Props) => {
         <Text>Chip-8 Emulator written in Typescript</Text>
       </VStack>
       <Divider />
-      <Flex alignItems="center" flexDir="column" pt={3}>
+      <VStack pt={3}>
         <FpsSlider fps={fps} setFps={setFps} />
         <Status trace={trace} started={started} />
-      </Flex>
+      </VStack>
     </>
   );
 };

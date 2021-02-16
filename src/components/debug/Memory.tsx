@@ -23,13 +23,15 @@ export const Memory = (props: Props) => {
   });
 
   const current = (
-    <HStack bg="green.400" spacing={4}>
-      <Text>{`0x${trace.pc.toString(16)}:`}</Text>
-      <Spacer />
-      <Text>{trace.opcodeSummary.current.pretty}</Text>
-      <Spacer />
-      <Text>{trace.opcodeSummary.current.description}</Text>
-    </HStack>
+    <Box bg="green.400">
+      <HStack spacing={4}>
+        <Text>{`0x${trace.pc.toString(16)}:`}</Text>
+        <Spacer />
+        <Text>{trace.opcodeSummary.current.pretty}</Text>
+        <Spacer />
+        <Text>{trace.opcodeSummary.current.description}</Text>
+      </HStack>
+    </Box>
   );
 
   const next = _.map(trace.opcodeSummary.next, (summary, index) => {
@@ -59,7 +61,7 @@ export const Memory = (props: Props) => {
         </HStack>
       </VStack>
       <Divider my={2} />
-      <VStack align="start" spacing={0} w="100%" pl={2}>
+      <VStack align="start" spacing={0} pl={2}>
         {previous}
         {current}
         {next}

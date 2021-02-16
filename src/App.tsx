@@ -1,19 +1,12 @@
 import React from 'react';
-import _ from 'lodash';
-import type { Emulator } from './emulator/emulator';
-import { Header } from './components/header/Header';
-import { Screen } from './components/Screen';
-import { Debug } from './components/debug/Debug';
-import { Information } from './components/information/Information';
+import { Box, Flex, VStack } from '@chakra-ui/react';
 import { useRafLoop, useUpdate } from 'react-use';
-import {
-  Flex,
-  Box,
-  Button,
-  HStack,
-  VStack,
-  ButtonGroup,
-} from '@chakra-ui/react';
+import { Controls } from './components/Controls';
+import { Debug } from './components/debug/Debug';
+import { Header } from './components/header/Header';
+import { Information } from './components/information/Information';
+import { Screen } from './components/Screen';
+import type { Emulator } from './emulator/emulator';
 
 interface Props {
   emulator: Emulator;
@@ -74,13 +67,15 @@ export const App = (props: Props) => {
   };
 
   return (
-    <Box justifyContent="center" h="100vh" bg="gray.100">
-      <Header
-        fps={fps}
-        setFps={setFps}
-        trace={emulator.getTrace()}
-        started={started}
-      />
+    <Box justifyContent="center" minH="100vh" bg="gray.100">
+      <Flex justify="center" flexDir="column">
+        <Header
+          fps={fps}
+          setFps={setFps}
+          trace={emulator.getTrace()}
+          started={started}
+        />
+      </Flex>
       <Flex py={2} px={150} h={600} justify="center">
         <Box w={600} border="1px solid black">
           <VStack spacing={0}>
@@ -88,18 +83,17 @@ export const App = (props: Props) => {
             <Information value={rom} onChange={setRom} />
           </VStack>
         </Box>
-        <Box w={600} border="1px solid black">
+        <Box w={600} border="1px solid black" borderLeftWidth="0px">
           <Debug emulator={emulator} />
         </Box>
       </Flex>
       <Flex justify="center">
-        <HStack>
-          <ButtonGroup size="md" colorScheme="green">
-            <Button onClick={toggle}>{started() ? 'Pause' : 'Run'}</Button>
-            <Button onClick={onStep}>Step</Button>
-            <Button onClick={onReset}>Reset</Button>
-          </ButtonGroup>
-        </HStack>
+        <Controls
+          toggle={toggle}
+          onStep={onStep}
+          onReset={onReset}
+          started={started}
+        />
       </Flex>
     </Box>
   );

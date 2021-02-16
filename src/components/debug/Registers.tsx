@@ -51,11 +51,11 @@ export const Registers = (props: Props) => {
       {vRegisters}
       <HStack>
         <Text>{`DT:`}</Text>
-        <Text>Delay</Text>
+        <Text>{trace.dt}</Text>
       </HStack>
       <HStack>
         <Text>{`ST:`}</Text>
-        <Text>Sound</Text>
+        <Text>{trace.st}</Text>
       </HStack>
     </VStack>
   );

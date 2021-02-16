@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { Box } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 
 interface Props {
   screen: number[][];
@@ -31,8 +31,8 @@ export const Screen = (props: Props) => {
   }, [screen, pc]);
 
   return (
-    <Box bg="black" w={600} h={300}>
-      <canvas ref={ref} width="500" height="300" />
-    </Box>
+    <Flex bg="black" w={600} h={300} border="2px solid green">
+      <canvas ref={ref} width="600" height="300" style={{ padding: '4px' }} />
+    </Flex>
   );
 };
