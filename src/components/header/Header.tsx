@@ -1,4 +1,4 @@
-import { VStack, Text, Divider, Flex } from '@chakra-ui/react';
+import { VStack, Text, Divider, Flex, HStack } from '@chakra-ui/react';
 import React from 'react';
 import type { Trace } from 'src/emulator/emulator';
 import { FpsSlider } from './FpsSlider';
@@ -9,10 +9,11 @@ interface Props {
   setFps: (value: number) => void;
   trace: Trace;
   started: () => boolean;
+  awaitingKeypress: boolean;
 }
 
 export const Header = (props: Props) => {
-  const { fps, setFps, trace, started } = props;
+  const { fps, setFps, trace, started, awaitingKeypress } = props;
 
   return (
     <>

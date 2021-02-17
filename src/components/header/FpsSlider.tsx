@@ -24,7 +24,7 @@ export const FpsSlider = (props: Props) => {
         <Slider
           aria-label="fps-slider"
           min={1}
-          max={60}
+          max={200}
           defaultValue={fps}
           onChange={(val) => setFps(val)}
           w={250}

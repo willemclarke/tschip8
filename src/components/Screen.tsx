@@ -22,7 +22,7 @@ export const Screen = (props: Props) => {
         for (let y = 0; y < 32; y++) {
           const pixel = screen[x][y];
           if (pixel === 1) {
-            context.fillStyle = '#4DED30';
+            context.fillStyle = '#68D391';
             context.fillRect(x * scale, y * scale, scale, scale);
           }
         }

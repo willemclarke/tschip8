@@ -22,7 +22,7 @@ describe('0 series opcodes', () => {
     const initialState = _.cloneDeep(emulator);
     emulator._00EE();
 
-    expect(emulator.pc).to.equal(initialState.stack.pop());
+    expect(emulator.pc).to.equal((initialState.stack.pop() as number) + 2);
     expect(emulator.sp).to.equal(initialState.sp - 1);
   });
 });
@@ -416,11 +416,56 @@ describe('Cxkk', () => {
 });
 
 describe('E series opcodes', () => {
-  it('Ex9e - Skip next instruction if key with the value of Vx is pressed', () => {});
-  it('Exa1 - Skip next instruction if key with the value of Vx is not pressed', () => {});
+  it('Ex9e - Skip next instruction if key with the value of Vx is pressed - Key IS pressed', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xe29e);
+    emulator.v[opcode.x] = 0x9;
+    emulator.keyInput[emulator.v[opcode.x]] = true;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Ex9E(opcode);
+
+    expect(emulator.keyInput[emulator.v[opcode.x]]).to.equal(true);
+    expect(emulator.pc).to.equal(initialState.pc + 4);
+  });
+
+  it('Ex9e - Do not skip next instruction if key with the value of Vx is pressed - Key is NOT pressed', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xe29e);
+    emulator.v[opcode.x] = 0x9;
+    emulator.keyInput[emulator.v[opcode.x]] = false;
+    const initialState = _.cloneDeep(emulator);
+    emulator._Ex9E(opcode);
+
+    expect(emulator.keyInput[emulator.v[opcode.x]]).to.equal(false);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
+
+  it('Exa1 - Skip next instruction if key with the value of Vx is not pressed - Key is NOT pressed', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xe2a1);
+    emulator.v[opcode.x] = 0x9;
+    emulator.keyInput[emulator.v[opcode.x]] = false;
+    const initialState = _.cloneDeep(emulator);
+    emulator._ExA1(opcode);
+
+    expect(emulator.keyInput[emulator.v[opcode.x]]).to.equal(false);
+    expect(emulator.pc).to.equal(initialState.pc + 4);
+  });
+
+  it('Exa1 - Do not skip next instruction if key with the value of Vx is not pressed - Key Is pressed', () => {
+    const emulator = new Emulator();
+    const opcode = parseOpcode(0xe2a1);
+    emulator.v[opcode.x] = 0x9;
+    emulator.keyInput[emulator.v[opcode.x]] = true;
+    const initialState = _.cloneDeep(emulator);
+    emulator._ExA1(opcode);
+
+    expect(emulator.keyInput[emulator.v[opcode.x]]).to.equal(true);
+    expect(emulator.pc).to.equal(initialState.pc + 2);
+  });
 });
 
-describe.only('F series opcodes', () => {
+describe('F series opcodes', () => {
   it('Fx07 - Set Vx = delay timer value', () => {
     const emulator = new Emulator();
     const opcode = parseOpcode(0xf207);
@@ -432,6 +477,7 @@ describe.only('F series opcodes', () => {
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 
+  // Note: still need to implement opcode and test
   it('Fx0A - Wait for a key press, store the value of the key in Vx', () => {});
 
   it('Fx15 - Set delay timer = Vx', () => {
@@ -492,6 +538,7 @@ describe.only('F series opcodes', () => {
     expect(emulator.pc).to.equal(initialState.pc + 2);
   });
 
+  // Note: need to figure out way to test
   it('Fx55 - Store registers V0 through Vx in memory starting at location I', () => {});
 
   it('Fx65 - Read registers V0 through Vx from memory starting at location I.', () => {});

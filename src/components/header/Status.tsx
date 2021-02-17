@@ -14,20 +14,25 @@ export const Status = (props: Props) => {
   const currentTrace = trace.opcodeSummary.current.pretty;
   const nextOpcode = trace.opcodeSummary.next[0]?.opcode?.pretty;
 
+  // Note: come back and clean this up, im positive it can be simplified
   return (
-    <Box px={4} pt={3}>
+    <Box pt={3}>
       <HStack>
         <HStack>
           <Text>Current opcode:</Text>
-          <Text fontWeight="extrabold" color="green.700">
-            {currentTrace}
-          </Text>
+          <Box w={70}>
+            <Text fontWeight="extrabold" color="green.700">
+              {currentTrace}
+            </Text>
+          </Box>
         </HStack>
         <HStack>
           <Text>Next opcode:</Text>
-          <Text fontWeight="extrabold" color="green.700">
-            {nextOpcode}
-          </Text>
+          <Box w={70}>
+            <Text fontWeight="extrabold" color="green.700">
+              {nextOpcode}
+            </Text>
+          </Box>
         </HStack>
         <Text fontWeight="bold" as="i">
           {started() ? 'Running' : 'Paused'}

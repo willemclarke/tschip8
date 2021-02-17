@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { RomSelector } from './Roms';
-import { Text, Kbd, Flex, SimpleGrid, VStack, Spacer } from '@chakra-ui/react';
+import { Text, Kbd, Flex, SimpleGrid, VStack } from '@chakra-ui/react';
 
 interface Props {
   value?: string;
@@ -50,7 +50,7 @@ const Instructions = () => {
       </Text>
       <Text>Select a rom from drop the down</Text>
       <Text>Press play and enjoy</Text>
-      <Text>If game runs too slowly, use the fps slider to adjust speed </Text>
+      <Text>If a game runs too slowly, use the fps slider to adjust speed</Text>
     </VStack>
   );
 };

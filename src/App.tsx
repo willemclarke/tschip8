@@ -18,7 +18,7 @@ export const App = (props: Props) => {
   const defaultFps = 1;
   const update = useUpdate();
 
-  const [rom, setRom] = React.useState<string | undefined>('/roms/IBMLOGO.bin');
+  const [rom, setRom] = React.useState<string | undefined>('/roms/TESTROM.bin');
   const [fps, setFps] = React.useState<number>(defaultFps);
   const [lastTime, setLastTime] = React.useState<number>(0);
 
@@ -68,12 +68,13 @@ export const App = (props: Props) => {
 
   return (
     <Box justifyContent="center" minH="100vh" bg="gray.100">
-      <Flex justify="center" flexDir="column">
+      <Flex justify="center" flexDir="column" alignItems="center">
         <Header
           fps={fps}
           setFps={setFps}
           trace={emulator.getTrace()}
           started={started}
+          awaitingKeypress={emulator.awaitingKeypress}
         />
       </Flex>
       <Flex py={2} px={150} h={600} justify="center">

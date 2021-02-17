@@ -26,6 +26,7 @@ const roms = [
   'PUZZLE.bin',
   'SYZYGY.bin',
   'TANK.bin',
+  'TESTROM.bin',
   'TETRIS.bin',
   'TICTAC.bin',
   'UFO.bin',

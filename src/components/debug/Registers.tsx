@@ -33,7 +33,7 @@ export const Registers = (props: Props) => {
     return (
       <HStack key={`V[${vRegisterIndexes[index]}}]`}>
         <Text>{`V${vRegisterIndexes[index]}:`}</Text>
-        <Text>{register.toString(16)}</Text>
+        <Text>{register.toString(16).toUpperCase()}</Text>
       </HStack>
     );
   });

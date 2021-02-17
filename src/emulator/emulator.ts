@@ -49,12 +49,16 @@ export class Emulator {
   i: number;
   st: number;
   dt: number;
-  keyInput: { [key: number]: boolean };
+  keys: boolean[];
+  currentKey: number | false;
+  awaitingKeypress: boolean;
+  keyInput: { [key: string]: number };
   scale: number;
   width: number;
   height: number;
   screen: number[][];
   trace: Trace;
+  paused: boolean;
 
   constructor() {
     this.reset();
@@ -69,28 +73,45 @@ export class Emulator {
     this.i = 0;
     this.st = 0;
     this.dt = 0;
+    this.keys = [];
+    this.currentKey = false;
+    this.awaitingKeypress = false;
     this.keyInput = {
-      0x1: false, // 1
-      0x2: false, // 2
-      0x3: false, // 3
-      0xc: false, // 4
-      0x4: false, // Q
-      0x5: false, // W
-      0x6: false, // E
-      0xd: false, // R
-      0x7: false, // A
-      0x8: false, // S
-      0x9: false, // D
-      0xe: false, // F
-      0xa: false, // Z
-      0x0: false, // X
-      0xb: false, // C
-      0xf: false, // V
+      ['Digit1']: 0x1, // 1
+      ['Digit2']: 0x2, // 2
+      ['Digit3']: 0x3, // 3
+      ['Digit4']: 0x4, // 4
+      ['KeyQ']: 0x5, // Q
+      ['KeyW']: 0x6, // W
+      ['KeyE']: 0x7, // E
+      ['KeyR']: 0x8, // R
+      ['KeyA']: 0x9, // A
+      ['KeyS']: 0xa, // S
+      ['KeyD']: 0xb, // D
+      ['KeyF']: 0xc, // F
+      ['KeyZ']: 0xd, // Z
+      ['KeyX']: 0xe, // X
+      ['KeyC']: 0xf, // C
+      ['KeyV']: 0x10, // V
     };
     this.scale = 10;
     this.width = 64;
     this.height = 32;
     this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
+
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (_.includes(Object.keys(this.keyInput), e.code)) {
+        this.keys[this.keyInput[e.code]] = true;
+        this.currentKey = this.keyInput[e.code];
+      }
+    });
+
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (_.includes(Object.keys(this.keyInput), e.code)) {
+        this.keys[this.keyInput[e.code]] = false;
+        this.currentKey = false;
+      }
+    });
   }
 
   step(): void {
@@ -215,6 +236,8 @@ export class Emulator {
         return this._ExA1(opcode);
       case Mnemonic['FX07']:
         return this._Fx07(opcode);
+      case Mnemonic['FX0A']:
+        return this._Fx0A(opcode);
       case Mnemonic['FX15']:
         return this._Fx15(opcode);
       case Mnemonic['FX18']:
@@ -240,7 +263,8 @@ export class Emulator {
   }
 
   _00EE(): void {
-    this.pc = this.stack.pop() as number;
+    // + 2 here as flip8 emulator says return to 202, however their PC is set to 204
+    this.pc = (this.stack.pop() as number) + 2;
     this.sp -= 1;
   }
 
@@ -320,6 +344,7 @@ export class Emulator {
     this.pc += 2;
   }
 
+  // According to TESTROM, 8xy5, 8xy6 & 8xye are bugged
   _8xy5(opcode: Opcode): void {
     const result = this.v[opcode.x] - this.v[opcode.y];
 
@@ -439,8 +464,17 @@ export class Emulator {
     this.pc += 2;
   }
 
-  // Note complete this opcode:
-  _Fx0A(opcode: Opcode): void {}
+  _Fx0A(opcode: Opcode): void {
+    if (!_.isNumber(this.currentKey)) {
+      console.log('Awaiting keypress...');
+      this.awaitingKeypress = true;
+      return;
+    } else {
+      this.awaitingKeypress = false;
+      this.v[opcode.x] = this.currentKey;
+      this.pc += 2;
+    }
+  }
 
   _Fx15(opcode: Opcode): void {
     this.dt = this.v[opcode.x];
@@ -484,5 +518,6 @@ export class Emulator {
     for (let registerIndex = 0; registerIndex <= opcode.x; registerIndex++) {
       this.v[registerIndex] = this.memory[this.i + registerIndex];
     }
+    this.pc += 2;
   }
 }
