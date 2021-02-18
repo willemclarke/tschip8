@@ -13,6 +13,7 @@ const roms = [
   'BLITZ.bin',
   'BRIX.bin',
   'CONNECT4.bin',
+  'CHIP8LOGO.bin',
   'GUESS.bin',
   'HIDDEN.bin',
   'IBMLOGO.bin',

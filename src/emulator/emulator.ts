@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { catchError } from './util';
-import { Mnemonic, parseOpcode } from './opcode';
+import { Mnemonic, parseOpcode, Opcode } from './opcode';
 
 export interface OpcodeSummary {
   previous: DebugInfo[];
@@ -11,21 +11,6 @@ export interface OpcodeSummary {
 export interface DebugInfo {
   pc: number;
   opcode: Opcode;
-}
-
-export interface Opcode {
-  mnemonic: Mnemonic;
-  description: string;
-  pretty: string;
-  hi: number;
-  lo: number;
-  nnn: number;
-  n: number;
-  x: number;
-  y: number;
-  kk: number;
-  raw: number;
-  i: number;
 }
 
 export interface Trace {
@@ -50,13 +35,14 @@ export class Emulator {
   st: number;
   dt: number;
   keys: boolean[];
-  currentKey: number | false;
+  currentKey: number | null;
   awaitingKeypress: boolean;
   keyInput: { [key: string]: number };
   scale: number;
   width: number;
   height: number;
-  screen: number[][];
+  screen: number[];
+  // screen: number[][];
   trace: Trace;
   paused: boolean;
 
@@ -74,7 +60,7 @@ export class Emulator {
     this.st = 0;
     this.dt = 0;
     this.keys = [];
-    this.currentKey = false;
+    this.currentKey = null;
     this.awaitingKeypress = false;
     this.keyInput = {
       ['Digit1']: 0x1, // 1
@@ -97,25 +83,26 @@ export class Emulator {
     this.scale = 10;
     this.width = 64;
     this.height = 32;
-    this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
+    // this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
+    this.screen = new Array(this.width * this.height);
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (_.includes(Object.keys(this.keyInput), e.code)) {
-        this.keys[this.keyInput[e.code]] = true;
-        this.currentKey = this.keyInput[e.code];
+      const key: number | undefined = this.keyInput[e.code];
+      if (key !== undefined) {
+        this.currentKey = key;
+        this.keys[key] = true;
       }
     });
 
     window.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (_.includes(Object.keys(this.keyInput), e.code)) {
-        this.keys[this.keyInput[e.code]] = false;
-        this.currentKey = false;
-      }
+      this.keys[this.keyInput[e.code]] = false;
+      this.currentKey = null;
     });
   }
 
   step(): void {
     const nextOpcode = this.getNextOpcode();
+    this.loadFontSpritesIntoMemory();
     this.executeOpcode(nextOpcode);
   }
 
@@ -131,6 +118,92 @@ export class Emulator {
 
   getNextOpcode(): Opcode {
     return parseOpcode(this.getWord16(this.pc));
+  }
+
+  loadFontSpritesIntoMemory(): void {
+    const sprites = [
+      0xf0,
+      0x90,
+      0x90,
+      0x90,
+      0xf0, // 0
+      0x20,
+      0x60,
+      0x20,
+      0x20,
+      0x70, // 1
+      0xf0,
+      0x10,
+      0xf0,
+      0x80,
+      0xf0, // 2
+      0xf0,
+      0x10,
+      0xf0,
+      0x10,
+      0xf0, // 3
+      0x90,
+      0x90,
+      0xf0,
+      0x10,
+      0x10, // 4
+      0xf0,
+      0x80,
+      0xf0,
+      0x10,
+      0xf0, // 5
+      0xf0,
+      0x80,
+      0xf0,
+      0x90,
+      0xf0, // 6
+      0xf0,
+      0x10,
+      0x20,
+      0x40,
+      0x40, // 7
+      0xf0,
+      0x90,
+      0xf0,
+      0x90,
+      0xf0, // 8
+      0xf0,
+      0x90,
+      0xf0,
+      0x10,
+      0xf0, // 9
+      0xf0,
+      0x90,
+      0xf0,
+      0x90,
+      0x90, // A
+      0xe0,
+      0x90,
+      0xe0,
+      0x90,
+      0xe0, // B
+      0xf0,
+      0x80,
+      0x80,
+      0x80,
+      0xf0, // C
+      0xe0,
+      0x90,
+      0x90,
+      0x90,
+      0xe0, // D
+      0xf0,
+      0x80,
+      0xf0,
+      0x80,
+      0xf0, // E
+      0xf0,
+      0x80,
+      0xf0,
+      0x80,
+      0x80, // F
+    ];
+    _.forEach(sprites, (sprite, index) => (this.memory[index] = sprite));
   }
 
   getOpcodeSummary(opcode: Opcode, pc: number): OpcodeSummary {
@@ -258,12 +331,13 @@ export class Emulator {
   }
 
   _00E0(): void {
-    this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
+    // this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
+    this.screen = new Array(this.width * this.height);
     this.pc += 2;
   }
 
   _00EE(): void {
-    // + 2 here as flip8 emulator says return to 202, however their PC is set to 204
+    // + 2 here to mimic the values of the flip8
     this.pc = (this.stack.pop() as number) + 2;
     this.sp -= 1;
   }
@@ -342,19 +416,34 @@ export class Emulator {
     }
     this.v[opcode.x] = result & 0xff;
     this.pc += 2;
+
+    // this.v[opcode.x] += this.v[opcode.y];
+    // this.v[0xf] = +(this.v[opcode.x] > 255);
+    // if (this.v[opcode.x] > 255) {
+    //   this.v[opcode.x] -= 256;
+    // }
+    // this.pc += 2;
   }
 
-  // According to TESTROM, 8xy5, 8xy6 & 8xye are bugged
   _8xy5(opcode: Opcode): void {
-    const result = this.v[opcode.x] - this.v[opcode.y];
+    //Note: this implementation was borrowed from web,
+    // was using to compare vs what I had
+    this.v[0xf] = +(this.v[opcode.x] > this.v[opcode.y]);
+    this.v[opcode.x] -= this.v[opcode.y];
 
-    if (this.v[opcode.x] > this.v[opcode.y]) {
-      this.v[0xf] = 1;
-    } else {
-      this.v[0xf] = 0;
+    if (this.v[opcode.x] < 0) {
+      this.v[opcode.x] += 256;
     }
-    this.v[opcode.x] = result;
     this.pc += 2;
+
+    // const result = this.v[opcode.x] - this.v[opcode.y];
+    // if (this.v[opcode.x] > this.v[opcode.y]) {
+    //   this.v[0xf] = 1;
+    // } else {
+    //   this.v[0xf] = 0;
+    // }
+    // this.v[opcode.x] = result;
+    // this.pc += 2;
   }
 
   _8xy6(opcode: Opcode): void {
@@ -370,27 +459,45 @@ export class Emulator {
   }
 
   _8xy7(opcode: Opcode): void {
-    const result = this.v[opcode.y] - this.v[opcode.x];
+    //Note: this implementation was borrowed from web,
+    // was using to compare vs what I had
+    this.v[0xf] = +(this.v[opcode.y] > this.v[opcode.x]);
+    this.v[opcode.x] = this.v[opcode.y] - this.v[opcode.x];
 
-    if (this.v[opcode.y] > this.v[opcode.x]) {
-      this.v[0xf] = 1;
-    } else {
-      this.v[0xf] = 0;
+    if (this.v[opcode.x] < 0) {
+      this.v[opcode.x] += 256;
     }
-    this.v[opcode.x] = result;
     this.pc += 2;
+
+    // const result = this.v[opcode.y] - this.v[opcode.x];
+    // if (this.v[opcode.y] > this.v[opcode.x]) {
+    //   this.v[0xf] = 1;
+    // } else {
+    //   this.v[0xf] = 0;
+    // }
+    // this.v[opcode.x] = result;
+    // this.pc += 2;
   }
 
+  // Note: broken
   _8xyE(opcode: Opcode): void {
-    const msb = (this.v[opcode.x] & 0xff) >> 7;
-
-    if (msb === 1) {
-      this.v[0xf] = 1;
-    } else {
-      this.v[0xf] = 0;
+    //Note: this implementation was borrowed from web,
+    // was using to compare vs what I had
+    this.v[0xf] = +(this.v[opcode.x] & 0x80);
+    this.v[opcode.x] <<= 1;
+    if (this.v[opcode.x] > 255) {
+      this.v[opcode.x] -= 256;
     }
-    this.v[opcode.x] *= 2;
     this.pc += 2;
+
+    // const msb = (this.v[opcode.x] & 0xff) >> 7;
+    // if (msb === 1) {
+    //   this.v[0xf] = 1;
+    // } else {
+    //   this.v[0xf] = 0;
+    // }
+    // this.v[opcode.x] *= 2;
+    // this.pc += 2;
   }
 
   _9xy0(opcode: Opcode): void {
@@ -415,6 +522,26 @@ export class Emulator {
     this.pc += 2;
   }
 
+  setPixel(x: number, y: number): boolean {
+    if (x > this.width) {
+      x -= this.width;
+    } else if (x < 0) {
+      x += this.width;
+    }
+
+    if (y > this.height) {
+      y -= this.height;
+    } else if (y < 0) {
+      y += this.height;
+    }
+
+    const location = x + y * this.width;
+
+    this.screen[location] ^= 1;
+
+    return !this.screen[location];
+  }
+
   _Dxyn(opcode: Opcode): void {
     const width = 8;
     const height = opcode.raw & 0xf;
@@ -429,22 +556,50 @@ export class Emulator {
         if ((sprite & 0x80) > 0) {
           const x = this.v[opcode.x] + col;
           const y = this.v[opcode.y] + row;
-          this.screen[x][y] ^= 1;
 
-          // If the pixel was erased, set VF to 1
-          if (this.screen[x][y]) {
-            this.v[0xf] = 1;
+          if ((sprite & 0x80) > 0) {
+            if (this.setPixel(x, y)) {
+              this.v[0xf] = 1;
+            }
           }
         }
         sprite <<= 1;
       }
     }
-
     this.pc += 2;
   }
 
+  // Doms draw:
+  // _Dxyn(opcode: Opcode): void {
+  //   const width = 8;
+  //   const height = opcode.raw & 0xf;
+
+  //   this.v[0xf] = 0;
+
+  //   for (let row = 0; row < height; row++) {
+  //     let sprite = this.memory[this.i + row];
+
+  //     for (let col = 0; col < width; col++) {
+  //       // If the bit (sprite) is not 0, render/erase the pixel
+  //       if ((sprite & 0x80) > 0) {
+  //         const x = this.v[opcode.x] + col;
+  //         const y = this.v[opcode.y] + row;
+  //         this.screen[x][y] ^= 1;
+
+  //         // If the pixel was erased, set VF to 1
+  //         if (this.screen[x][y]) {
+  //           this.v[0xf] = 1;
+  //         }
+  //       }
+  //       sprite <<= 1;
+  //     }
+  //   }
+
+  //   this.pc += 2;
+  // }
+
   _Ex9E(opcode: Opcode): void {
-    if (this.keyInput[this.v[opcode.x]]) {
+    if (this.keys[this.v[opcode.x]] === true) {
       this.pc += 4;
     } else {
       this.pc += 2;
@@ -452,7 +607,7 @@ export class Emulator {
   }
 
   _ExA1(opcode: Opcode): void {
-    if (!this.keyInput[this.v[opcode.x]]) {
+    if (this.keys[this.v[opcode.x]] === false) {
       this.pc += 4;
     } else {
       this.pc += 2;
@@ -465,8 +620,7 @@ export class Emulator {
   }
 
   _Fx0A(opcode: Opcode): void {
-    if (!_.isNumber(this.currentKey)) {
-      console.log('Awaiting keypress...');
+    if (_.isNull(this.currentKey)) {
       this.awaitingKeypress = true;
       return;
     } else {
