@@ -9,7 +9,6 @@ interface Props {
 
 const roms = [
   '15PUZZLE.bin',
-  'BLINKY.bin',
   'BLITZ.bin',
   'BRIX.bin',
   'CONNECT4.bin',

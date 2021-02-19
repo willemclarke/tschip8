@@ -1,23 +1,29 @@
 import React from 'react';
-import { Box, Text, HStack } from '@chakra-ui/react';
+import { Box, Text, HStack, Divider } from '@chakra-ui/react';
 import type { Trace } from '../../emulator/emulator';
 import _ from 'lodash';
 
 interface Props {
   trace: Trace;
   started: () => boolean;
+  awaitingKeypress: boolean;
 }
 
 export const Status = (props: Props) => {
-  const { trace, started } = props;
+  const { trace, started, awaitingKeypress } = props;
 
   const currentTrace = trace.opcodeSummary.current.pretty;
   const nextOpcode = trace.opcodeSummary.next[0]?.opcode?.pretty;
 
-  // Note: come back and clean this up, im positive it can be simplified
   return (
     <Box pt={3}>
       <HStack>
+        <Box w={90}>
+          <Text fontWeight="extrabold" color="green.700">
+            {awaitingKeypress ? 'PRESS KEY' : ''}
+          </Text>
+        </Box>
+        <Divider orientation="vertical" />
         <HStack>
           <Text>Current opcode:</Text>
           <Box w={70}>

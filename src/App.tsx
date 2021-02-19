@@ -66,15 +66,13 @@ export const App = (props: Props) => {
 
   return (
     <Box justifyContent="center" minH="100vh" bg="gray.100">
-      <Flex justify="center" flexDir="column" alignItems="center">
-        <Header
-          fps={fps}
-          setFps={setFps}
-          trace={emulator.getTrace()}
-          started={started}
-          awaitingKeypress={emulator.awaitingKeypress}
-        />
-      </Flex>
+      <Header
+        fps={fps}
+        setFps={setFps}
+        trace={emulator.getTrace()}
+        started={started}
+        awaitingKeypress={emulator.awaitingKeypress}
+      />
       <Flex py={2} px={150} h={600} justify="center">
         <Box w={600} border="1px solid black">
           <VStack spacing={0}>
@@ -86,14 +84,12 @@ export const App = (props: Props) => {
           <Debug emulator={emulator} />
         </Box>
       </Flex>
-      <Flex justify="center">
-        <Controls
-          toggle={toggle}
-          onStep={onStep}
-          onReset={onReset}
-          started={started}
-        />
-      </Flex>
+      <Controls
+        toggle={toggle}
+        onStep={onStep}
+        onReset={onReset}
+        started={started}
+      />
     </Box>
   );
 };
