@@ -1,8 +1,9 @@
 import React from 'react';
 import _ from 'lodash';
+import { Flex } from '@chakra-ui/react';
 
 interface Props {
-  screen: number[][];
+  screen: number[];
   pc: number;
 }
 
@@ -17,17 +18,23 @@ export const Screen = (props: Props) => {
     if (context) {
       context.clearRect(0, 0, 64 * scale, 32 * scale);
 
-      for (let x = 0; x < 64; x++) {
-        for (let y = 0; y < 32; y++) {
-          const pixel = screen[x][y];
-          if (pixel === 1) {
-            context.fillStyle = 'blue';
-            context.fillRect(x * scale, y * scale, scale, scale);
-          }
+      for (let i = 0; i < 64 * 32; i++) {
+        let x = (i % 64) * scale;
+
+        // Grabs the y position of the pixel based off of `i`
+        let y = Math.floor(i / 64) * scale;
+
+        if (screen[i] === 1) {
+          context.fillStyle = '#68D391';
+          context.fillRect(x, y, scale, scale);
         }
       }
     }
   }, [screen, pc]);
 
-  return <canvas ref={ref} width="640" height="320" />;
+  return (
+    <Flex bg="black" w={600} h={300} border="2px solid green">
+      <canvas ref={ref} width="640" height="320" style={{ padding: '4px' }} />
+    </Flex>
+  );
 };

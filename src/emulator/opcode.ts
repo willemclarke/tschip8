@@ -1,4 +1,17 @@
-import type { Opcode } from './emulator';
+export interface Opcode {
+  mnemonic: Mnemonic;
+  description: string;
+  pretty: string;
+  hi: number;
+  lo: number;
+  nnn: number;
+  n: number;
+  x: number;
+  y: number;
+  kk: number;
+  raw: number;
+  i: number;
+}
 
 export enum Mnemonic {
   '0x0' = '0x0',

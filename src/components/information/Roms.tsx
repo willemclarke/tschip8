@@ -9,10 +9,10 @@ interface Props {
 
 const roms = [
   '15PUZZLE.bin',
-  'BLINKY.bin',
   'BLITZ.bin',
   'BRIX.bin',
   'CONNECT4.bin',
+  'CHIP8LOGO.bin',
   'GUESS.bin',
   'HIDDEN.bin',
   'IBMLOGO.bin',
@@ -26,6 +26,8 @@ const roms = [
   'PUZZLE.bin',
   'SYZYGY.bin',
   'TANK.bin',
+  'TESTROM.bin',
+  'TESTROM2.bin',
   'TETRIS.bin',
   'TICTAC.bin',
   'UFO.bin',
@@ -47,13 +49,12 @@ export const RomSelector = (props: Props) => {
 
   return (
     <Select
-      p={1}
       placeholder="Select rom"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      variant="filled"
+      variant="flushed"
       fontWeight="bold"
-      size="sm"
+      size="md"
     >
       {options}
     </Select>

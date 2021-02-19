@@ -31,28 +31,40 @@ const Keys = () => {
   const keyboardKeys = _.map(keys, (key) => <Kbd key={key}>{key}</Kbd>);
 
   return (
-    <>
+    <VStack align="start">
       <Text fontSize="xl" fontWeight="bold">
         Keypad input
       </Text>
       <SimpleGrid columns={4} spacingX={2} spacingY={2}>
         {keyboardKeys}
       </SimpleGrid>
-    </>
+    </VStack>
   );
 };
 
-const Instructions = () => {};
+const Instructions = () => {
+  return (
+    <VStack align="start">
+      <Text fontSize="xl" fontWeight="bold">
+        Instructions
+      </Text>
+      <Text>Select a rom from drop the down</Text>
+      <Text>Press play and enjoy</Text>
+      <Text>If a game runs too slowly, use the fps slider to adjust speed</Text>
+    </VStack>
+  );
+};
 
 export const Information = (props: Props) => {
   const { value, onChange } = props;
 
   return (
-    <Flex p={2} w={700} flexDir="column">
+    <Flex p={4} w={600} h={300} flexDir="column">
       <RomSelector value={value} onChange={onChange} />
-      <VStack align="start" spacing={2}>
+      <Flex justify="space-between" py={2}>
         <Keys />
-      </VStack>
+        <Instructions />
+      </Flex>
     </Flex>
   );
 };

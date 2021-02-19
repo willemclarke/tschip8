@@ -9,18 +9,19 @@ interface Props {
   setFps: (value: number) => void;
   trace: Trace;
   started: () => boolean;
+  awaitingKeypress: boolean;
 }
 
 export const Header = (props: Props) => {
-  const { fps, setFps, trace, started } = props;
+  const { fps, setFps, trace, started, awaitingKeypress } = props;
 
   return (
-    <>
+    <Flex justify="center" flexDir="column">
       <VStack spacing={-1} py={2}>
         <Text
           fontSize="2xl"
           fontWeight="extrabold"
-          bgGradient="linear(to-r, green.600, green.700)"
+          bgGradient="linear(to-r, green.500, green.600)"
           bgClip="text"
         >
           tschip8
@@ -28,10 +29,14 @@ export const Header = (props: Props) => {
         <Text>Chip-8 Emulator written in Typescript</Text>
       </VStack>
       <Divider />
-      <Flex alignItems="center" flexDir="column" pt={3}>
+      <VStack pt={3}>
         <FpsSlider fps={fps} setFps={setFps} />
-        <Status trace={trace} started={started} />
-      </Flex>
-    </>
+        <Status
+          trace={trace}
+          started={started}
+          awaitingKeypress={awaitingKeypress}
+        />
+      </VStack>
+    </Flex>
   );
 };
