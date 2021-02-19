@@ -20,24 +20,15 @@ export const Screen = (props: Props) => {
 
       for (let i = 0; i < 64 * 32; i++) {
         let x = (i % 64) * scale;
+
         // Grabs the y position of the pixel based off of `i`
         let y = Math.floor(i / 64) * scale;
 
         if (screen[i] === 1) {
           context.fillStyle = '#68D391';
           context.fillRect(x, y, scale, scale);
-          // context.fillRect(x * scale, y * scale, scale, scale);
         }
       }
-      //   for (let x = 0; x < 64; x++) {
-      //     for (let y = 0; y < 32; y++) {
-      //       const pixel = screen[x];
-      //       if (pixel === 1) {
-      //         context.fillStyle = '#68D391';
-      //         context.fillRect(x * scale, y * scale, scale, scale);
-      //       }
-      //     }
-      //   }
     }
   }, [screen, pc]);
 

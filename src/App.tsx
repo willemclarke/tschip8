@@ -15,7 +15,7 @@ interface Props {
 export const App = (props: Props) => {
   const { emulator } = props;
 
-  const defaultFps = 1;
+  const defaultFps = 100;
   const update = useUpdate();
 
   const [rom, setRom] = React.useState<string | undefined>('/roms/TESTROM.bin');
@@ -26,19 +26,17 @@ export const App = (props: Props) => {
     if (time - lastTime < 1000 / fps) {
       return;
     }
+
     setLastTime(time);
     emulator.step();
   }, false);
 
-  const init = async (rom: string) => {
-    await fetch(rom)
-      .then((resp) => {
-        return resp.arrayBuffer();
-      })
-      .then((buffer) => {
-        emulator.reset();
-        emulator.loadRom(buffer);
-      });
+  const init = async (romPath: string) => {
+    const rom = await fetch(romPath);
+    const romBuffer = await rom.arrayBuffer();
+
+    emulator.reset();
+    emulator.loadRom(romBuffer);
   };
 
   React.useEffect(() => {

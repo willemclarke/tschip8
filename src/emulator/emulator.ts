@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { catchError } from './util';
 import { Mnemonic, parseOpcode, Opcode } from './opcode';
+import { Audio } from './audio';
 
 export interface OpcodeSummary {
   previous: DebugInfo[];
@@ -17,7 +18,7 @@ export interface Trace {
   opcode: Opcode;
   pc: number;
   i: number;
-  v: number[];
+  v: Uint8Array;
   sp: number;
   stack: number[];
   st: number;
@@ -30,7 +31,7 @@ export class Emulator {
   pc: number;
   sp: number;
   stack: number[];
-  v: number[];
+  v: Uint8Array;
   i: number;
   st: number;
   dt: number;
@@ -42,9 +43,9 @@ export class Emulator {
   width: number;
   height: number;
   screen: number[];
-  // screen: number[][];
   trace: Trace;
   paused: boolean;
+  audio: Audio;
 
   constructor() {
     this.reset();
@@ -55,7 +56,7 @@ export class Emulator {
     this.pc = 0x200;
     this.sp = 0;
     this.stack = [];
-    this.v = Array(0x10).fill(0);
+    this.v = new Uint8Array(0x10);
     this.i = 0;
     this.st = 0;
     this.dt = 0;
@@ -63,28 +64,29 @@ export class Emulator {
     this.currentKey = null;
     this.awaitingKeypress = false;
     this.keyInput = {
-      ['Digit1']: 0x1, // 1
-      ['Digit2']: 0x2, // 2
-      ['Digit3']: 0x3, // 3
-      ['Digit4']: 0x4, // 4
-      ['KeyQ']: 0x5, // Q
-      ['KeyW']: 0x6, // W
-      ['KeyE']: 0x7, // E
-      ['KeyR']: 0x8, // R
-      ['KeyA']: 0x9, // A
-      ['KeyS']: 0xa, // S
-      ['KeyD']: 0xb, // D
-      ['KeyF']: 0xc, // F
-      ['KeyZ']: 0xd, // Z
-      ['KeyX']: 0xe, // X
-      ['KeyC']: 0xf, // C
-      ['KeyV']: 0x10, // V
+      ['Digit1']: 0x1,
+      ['Digit2']: 0x2,
+      ['Digit3']: 0x3,
+      ['Digit4']: 0x4,
+      ['KeyQ']: 0x5,
+      ['KeyW']: 0x6,
+      ['KeyE']: 0x7,
+      ['KeyR']: 0x8,
+      ['KeyA']: 0x9,
+      ['KeyS']: 0xa,
+      ['KeyD']: 0xb,
+      ['KeyF']: 0xc,
+      ['KeyZ']: 0xd,
+      ['KeyX']: 0xe,
+      ['KeyC']: 0xf,
+      ['KeyV']: 0x10,
     };
     this.scale = 10;
     this.width = 64;
     this.height = 32;
-    // this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
     this.screen = new Array(this.width * this.height);
+    this.paused = false;
+    this.audio = new Audio();
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
       const key: number | undefined = this.keyInput[e.code];
@@ -98,12 +100,6 @@ export class Emulator {
       this.keys[this.keyInput[e.code]] = false;
       this.currentKey = null;
     });
-  }
-
-  step(): void {
-    const nextOpcode = this.getNextOpcode();
-    this.loadFontSpritesIntoMemory();
-    this.executeOpcode(nextOpcode);
   }
 
   loadRom(rom: ArrayBuffer): void {
@@ -120,7 +116,7 @@ export class Emulator {
     return parseOpcode(this.getWord16(this.pc));
   }
 
-  loadFontSpritesIntoMemory(): void {
+  loadFontSprites(): void {
     const sprites = [
       0xf0,
       0x90,
@@ -254,6 +250,27 @@ export class Emulator {
     };
   }
 
+  playSound() {
+    if (this.st > 0) {
+      this.audio.play(440);
+    } else {
+      this.audio.stop();
+    }
+  }
+
+  updateDelayAndSoundTimers(): void {
+    this.dt > 0 ? (this.dt -= 1) : this.dt;
+    this.st > 0 ? (this.st -= 1) : this.st;
+  }
+
+  step(): void {
+    const nextOpcode = this.getNextOpcode();
+    this.loadFontSprites();
+    this.executeOpcode(nextOpcode);
+    this.updateDelayAndSoundTimers();
+    this.playSound();
+  }
+
   executeOpcode(opcode: Opcode): void {
     switch (opcode.mnemonic) {
       case Mnemonic['00E0']:
@@ -331,7 +348,6 @@ export class Emulator {
   }
 
   _00E0(): void {
-    // this.screen = [...Array(this.width)].map((e) => Array(this.height).fill(0));
     this.screen = new Array(this.width * this.height);
     this.pc += 2;
   }
@@ -406,6 +422,8 @@ export class Emulator {
     this.pc += 2;
   }
 
+  // Note: as this.v is of type Uint8Array, if result > 8 bits (overflows)
+  // the Uint8Array will automatically take the lower rightmost 8 bits
   _8xy4(opcode: Opcode): void {
     const result = (this.v[opcode.x] += this.v[opcode.y]);
 
@@ -414,36 +432,24 @@ export class Emulator {
     } else {
       this.v[0xf] = 0;
     }
-    this.v[opcode.x] = result & 0xff;
-    this.pc += 2;
 
-    // this.v[opcode.x] += this.v[opcode.y];
-    // this.v[0xf] = +(this.v[opcode.x] > 255);
-    // if (this.v[opcode.x] > 255) {
-    //   this.v[opcode.x] -= 256;
-    // }
-    // this.pc += 2;
+    this.v[opcode.x] = result;
+    this.pc += 2;
   }
 
+  // Note: like 8xy4, Uint8Array type of this.v will handle
+  // the underflow: e.g. -1 equals 255, -2 equals 254
   _8xy5(opcode: Opcode): void {
-    //Note: this implementation was borrowed from web,
-    // was using to compare vs what I had
-    this.v[0xf] = +(this.v[opcode.x] > this.v[opcode.y]);
-    this.v[opcode.x] -= this.v[opcode.y];
+    const result = this.v[opcode.x] - this.v[opcode.y];
 
-    if (this.v[opcode.x] < 0) {
-      this.v[opcode.x] += 256;
+    if (this.v[opcode.x] > this.v[opcode.y]) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
     }
-    this.pc += 2;
 
-    // const result = this.v[opcode.x] - this.v[opcode.y];
-    // if (this.v[opcode.x] > this.v[opcode.y]) {
-    //   this.v[0xf] = 1;
-    // } else {
-    //   this.v[0xf] = 0;
-    // }
-    // this.v[opcode.x] = result;
-    // this.pc += 2;
+    this.v[opcode.x] = result;
+    this.pc += 2;
   }
 
   _8xy6(opcode: Opcode): void {
@@ -454,50 +460,35 @@ export class Emulator {
     } else {
       this.v[0xf] = 0;
     }
+
     this.v[opcode.x] /= 2;
     this.pc += 2;
   }
 
   _8xy7(opcode: Opcode): void {
-    //Note: this implementation was borrowed from web,
-    // was using to compare vs what I had
-    this.v[0xf] = +(this.v[opcode.y] > this.v[opcode.x]);
-    this.v[opcode.x] = this.v[opcode.y] - this.v[opcode.x];
+    const result = this.v[opcode.y] - this.v[opcode.x];
 
-    if (this.v[opcode.x] < 0) {
-      this.v[opcode.x] += 256;
+    if (this.v[opcode.y] > this.v[opcode.x]) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
     }
-    this.pc += 2;
 
-    // const result = this.v[opcode.y] - this.v[opcode.x];
-    // if (this.v[opcode.y] > this.v[opcode.x]) {
-    //   this.v[0xf] = 1;
-    // } else {
-    //   this.v[0xf] = 0;
-    // }
-    // this.v[opcode.x] = result;
-    // this.pc += 2;
+    this.v[opcode.x] = result;
+    this.pc += 2;
   }
 
-  // Note: broken
   _8xyE(opcode: Opcode): void {
-    //Note: this implementation was borrowed from web,
-    // was using to compare vs what I had
-    this.v[0xf] = +(this.v[opcode.x] & 0x80);
-    this.v[opcode.x] <<= 1;
-    if (this.v[opcode.x] > 255) {
-      this.v[opcode.x] -= 256;
-    }
-    this.pc += 2;
+    const msb = (this.v[opcode.x] & 0xff) >> 7;
 
-    // const msb = (this.v[opcode.x] & 0xff) >> 7;
-    // if (msb === 1) {
-    //   this.v[0xf] = 1;
-    // } else {
-    //   this.v[0xf] = 0;
-    // }
-    // this.v[opcode.x] *= 2;
-    // this.pc += 2;
+    if (msb === 1) {
+      this.v[0xf] = 1;
+    } else {
+      this.v[0xf] = 0;
+    }
+
+    this.v[opcode.x] *= 2;
+    this.pc += 2;
   }
 
   _9xy0(opcode: Opcode): void {
@@ -558,6 +549,7 @@ export class Emulator {
           const y = this.v[opcode.y] + row;
 
           if ((sprite & 0x80) > 0) {
+            // If setPixel returns 1, which means a pixel was erased, set VF to 1
             if (this.setPixel(x, y)) {
               this.v[0xf] = 1;
             }
@@ -568,35 +560,6 @@ export class Emulator {
     }
     this.pc += 2;
   }
-
-  // Doms draw:
-  // _Dxyn(opcode: Opcode): void {
-  //   const width = 8;
-  //   const height = opcode.raw & 0xf;
-
-  //   this.v[0xf] = 0;
-
-  //   for (let row = 0; row < height; row++) {
-  //     let sprite = this.memory[this.i + row];
-
-  //     for (let col = 0; col < width; col++) {
-  //       // If the bit (sprite) is not 0, render/erase the pixel
-  //       if ((sprite & 0x80) > 0) {
-  //         const x = this.v[opcode.x] + col;
-  //         const y = this.v[opcode.y] + row;
-  //         this.screen[x][y] ^= 1;
-
-  //         // If the pixel was erased, set VF to 1
-  //         if (this.screen[x][y]) {
-  //           this.v[0xf] = 1;
-  //         }
-  //       }
-  //       sprite <<= 1;
-  //     }
-  //   }
-
-  //   this.pc += 2;
-  // }
 
   _Ex9E(opcode: Opcode): void {
     if (this.keys[this.v[opcode.x]] === true) {
@@ -622,7 +585,6 @@ export class Emulator {
   _Fx0A(opcode: Opcode): void {
     if (_.isNull(this.currentKey)) {
       this.awaitingKeypress = true;
-      return;
     } else {
       this.awaitingKeypress = false;
       this.v[opcode.x] = this.currentKey;

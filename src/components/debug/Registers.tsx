@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import type { Trace } from '../../emulator/emulator';
-import { VStack, Text, HStack, Box, Spacer, Divider } from '@chakra-ui/react';
+import { VStack, Text, HStack, Box, Divider } from '@chakra-ui/react';
 
 interface Props {
   trace: Trace;
@@ -51,11 +51,11 @@ export const Registers = (props: Props) => {
       {vRegisters}
       <HStack>
         <Text>{`DT:`}</Text>
-        <Text>{trace.dt}</Text>
+        <Text>{trace.dt.toString(16).toUpperCase()}</Text>
       </HStack>
       <HStack>
         <Text>{`ST:`}</Text>
-        <Text>{trace.st}</Text>
+        <Text>{trace.st.toString(16).toUpperCase()}</Text>
       </HStack>
     </VStack>
   );
