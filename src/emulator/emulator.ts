@@ -38,13 +38,13 @@ export class Emulator {
   keys: boolean[];
   currentKey: number | null;
   awaitingKeypress: boolean;
+  onNextKeyPress: null | ((key: number) => void);
   keyInput: { [key: string]: number };
   scale: number;
   width: number;
   height: number;
   screen: number[];
   trace: Trace;
-  paused: boolean;
   audio: Audio;
 
   constructor() {
@@ -61,8 +61,8 @@ export class Emulator {
     this.st = 0;
     this.dt = 0;
     this.keys = [];
-    this.currentKey = null;
     this.awaitingKeypress = false;
+    this.onNextKeyPress = null;
     this.keyInput = {
       ['Digit1']: 0x1,
       ['Digit2']: 0x2,
@@ -85,21 +85,35 @@ export class Emulator {
     this.width = 64;
     this.height = 32;
     this.screen = new Array(this.width * this.height);
-    this.paused = false;
     this.audio = new Audio();
 
+    // Note: if this approach can be improved, refer back to master code
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-      const key: number | undefined = this.keyInput[e.code];
-      if (key !== undefined) {
-        this.currentKey = key;
-        this.keys[key] = true;
-      }
+      this.onKeyDown(e), false;
     });
 
     window.addEventListener('keyup', (e: KeyboardEvent) => {
-      this.keys[this.keyInput[e.code]] = false;
-      this.currentKey = null;
+      this.onKeyUp(e), false;
     });
+  }
+
+  // New method based off tutorial
+  isKeyPressed(keyCode: number): boolean {
+    return this.keys[keyCode];
+  }
+
+  onKeyDown(e: KeyboardEvent): void {
+    const key: number | undefined = this.keyInput[e.code];
+    this.keys[key] = true;
+
+    if (this.onNextKeyPress !== null && key) {
+      this.onNextKeyPress(key);
+      this.onNextKeyPress = null;
+    }
+  }
+
+  onKeyUp(e: KeyboardEvent): void {
+    this.keys[this.keyInput[e.code]] = false;
   }
 
   loadRom(rom: ArrayBuffer): void {
@@ -398,7 +412,7 @@ export class Emulator {
   }
 
   _7xkk(opcode: Opcode): void {
-    this.v[opcode.x] = (this.v[opcode.x] + opcode.kk) & 0xff;
+    this.v[opcode.x] = this.v[opcode.x] + opcode.kk;
     this.pc += 2;
   }
 
@@ -561,8 +575,9 @@ export class Emulator {
     this.pc += 2;
   }
 
+  // Note: if this approach is not optimal, start back from code on master
   _Ex9E(opcode: Opcode): void {
-    if (this.keys[this.v[opcode.x]] === true) {
+    if (this.isKeyPressed(this.v[opcode.x])) {
       this.pc += 4;
     } else {
       this.pc += 2;
@@ -570,7 +585,7 @@ export class Emulator {
   }
 
   _ExA1(opcode: Opcode): void {
-    if (this.keys[this.v[opcode.x]] === false) {
+    if (!this.isKeyPressed(this.v[opcode.x])) {
       this.pc += 4;
     } else {
       this.pc += 2;
@@ -583,13 +598,13 @@ export class Emulator {
   }
 
   _Fx0A(opcode: Opcode): void {
-    if (_.isNull(this.currentKey)) {
-      this.awaitingKeypress = true;
-    } else {
+    this.awaitingKeypress = true;
+
+    this.onNextKeyPress = (key) => {
       this.awaitingKeypress = false;
-      this.v[opcode.x] = this.currentKey;
+      this.v[opcode.x] = key;
       this.pc += 2;
-    }
+    };
   }
 
   _Fx15(opcode: Opcode): void {

@@ -20,7 +20,6 @@ export const Screen = (props: Props) => {
 
       for (let i = 0; i < 64 * 32; i++) {
         let x = (i % 64) * scale;
-
         // Grabs the y position of the pixel based off of `i`
         let y = Math.floor(i / 64) * scale;
 
